@@ -5,13 +5,13 @@ import matplotlib.pyplot as plt
 #%% General
 
 def EulerStep(Ftx, Xn, Tn,StepSize):
-    return np.add(Xn,StepSize*Ftx(Tn,Xn))
+    return np.add(Xn,StepSize*Ftx(Xn,Tn))
 
 def RungeKutta4(Ftx,Xn,Tn,StepSize):
-    k1 = Ftx(Tn,Xn)
-    k2 = Ftx(Tn+(StepSize/2),Xn+StepSize*k1/2)
-    k3 = Ftx(Tn+StepSize/2,Xn+StepSize*k2/2)
-    k4 = Ftx(Tn+StepSize,Xn+StepSize*k3)
+    k1 = Ftx(Xn,Tn)
+    k2 = Ftx(Xn+StepSize*k1/2,Tn+(StepSize/2))
+    k3 = Ftx(Xn+StepSize*k2/2,Tn+StepSize/2)
+    k4 = Ftx(Xn+StepSize*k3,Tn+StepSize)
     return np.add(Xn,(StepSize/6)*(k1+2*k2+2*k3+k4))
 
 #def Solve_to(t0,t1,x0,DeltaTMax,SolverToUse,FuncToSolve):
