@@ -32,10 +32,10 @@ def VectorODe(t,x):
     return np.array([x1,x2])
 x0 = [0,1]
 t0 = 0
-t1 = 550
+t1 = 50
 MinStep = 0.1
 
-t,x = Solve_to(t0,t1,x0,MinStep,RungeKutta4,VectorODe)
+t,x = Solve_to(t0,t1,x0,MinStep,EulerStep,VectorODe)
 plt.subplot(2,1,1)
 plt.plot(t,x[0,:])
 plt.title("x vs t")
@@ -43,7 +43,7 @@ plt.subplot(2,1,2)
 plt.plot(x[1,:],x[0,:])
 plt.title("x vs x'")
 plt.tight_layout()
-plt.suptitle("RungeKutta4 solutions", fontsize=16)
+plt.suptitle("Eulers method solutions", fontsize=16)
 plt.subplots_adjust(top=0.85,bottom=0.15)
 plt.figtext(0.1,0.05,f"For x''=-x with x(0)={x0[0]} and x'(0)={x0[1]}  evaluated to x({t1})with stepsize {MinStep}",wrap=True)
 
