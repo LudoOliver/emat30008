@@ -24,9 +24,10 @@ def Solve_to(FuncToSolve,x0,tspan,DeltaTMax,SolverToUse,):
     XArray[:,0] = x0
     for i in range(1,NSteps):
         XArray[:,i] = SolverToUse(FuncToSolve,XArray[:,i-1],TArray[i-1],StepSize)
-    return TArray,XArray
+    return XArray, TArray
 
 #%% Specific
+"""
 def ODEFunc(t,x):
     return x
 
@@ -60,3 +61,4 @@ plt.show()
 #plt.legend()
 #plt.show()
 
+"""
