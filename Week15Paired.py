@@ -1,5 +1,10 @@
 # Problem 1
 
+### Main problems - How do i work through this ive got 3 unkowns im trying to find roots of right?
+### unlesss i x corrrealte to find period wtf do i do
+### do i just care about finding a single co-ordinate?
+### would it be easisest to just iterate for ages and find repeated section in
+
 import scipy
 import math
 import numpy as np
@@ -17,14 +22,59 @@ def predator_prey(x,t):
 #print((6)(1))
 
 InitCon = np.array([0.1,0.1])
-MinStep = 0.01
+MinStep = 0.1
 Time = [0,100]
 
-x,t = ODESolver.Solve_to(predator_prey,InitCon,Time,MinStep,ODESolver.RungeKutta4)
-#print(x)
-#print(t)
-plt.plot(x[0,:],x[1,:])
+
+
+def SingleShot(EqnToSolve,ShootArray):
+   StartConditions = ShootArray[0:2]
+   Period = ShootArray[-1]
+   x,t = ODESolver.Solve_to(EqnToSolve,StartConditions,[0,Period],MinStep,ODESolver.RungeKutta4)
+   G = StartConditions-x[:,-1] #Difference between output and input
+   #print(G)
+   G = np.append(G,EqnToSolve(x[:,-1],0)[0])
+   return G
+
+ShootGuess = np.array([0.3,0.3,32])
+def Shooting(EqnToSolve,ShootArray):
+   CycleVector = scipy.optimize.root(lambda ShootArray: SingleShot(EqnToSolve,ShootArray),ShootArray)
+   return CycleVector.x
+
+Test = SingleShot(predator_prey,ShootGuess)
+print(Test,"worked")
+
+FoundX,FoundY,FoundPeriod = Shooting(predator_prey,ShootGuess)
+#print(Solution)
+#FoundX,FoundY,FoundTime
+FoundICs = [FoundX,FoundY]
+FoundTime = [0, FoundPeriod]
+x,t = ODESolver.Solve_to(predator_prey,FoundICs,FoundTime,MinStep,ODESolver.RungeKutta4)
+plt.plot(x[0,:],x[1,:]) 
+#plt.plot(t,x[1,:]) #Shows that period is roughly 32 for b= 0.1 and a 
 plt.show()
+
+
+def PeriodShooting(EqnToSolve,StartConditions,Period,Error,StepSize):
+   OldG = np.linalg.norm(SingleShot(EqnToSolve, StartConditions,Period))
+   if np.linalg.norm(OldG) > Error:
+      NewG = np.linalg.norm(SingleShot(EqnToSolve, StartConditions,(Period+StepSize)))
+      Period = Period+StepSize*(OldG/(NewG-OldG))
+      return PeriodShooting(EqnToSolve,StartConditions,Period,Error,StepSize)
+   else:
+      return Period
+
+#T = PeriodShooting(predator_prey,InitCon,[0,32],0.2)
+
+
+#solution = scipy.optimize.fsolve(SingleShot)
+
+### Any working solution would be using some weird method i dont at all undestand
+### What does a solution mean
+
+
+
+
 """ #Visualising the vector field
 y0 = np.array([0.1,0.1])
 t = np.linspace(0, 1, 20)
