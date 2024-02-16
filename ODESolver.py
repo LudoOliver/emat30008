@@ -16,6 +16,7 @@ def RungeKutta4(Ftx,Xn,Tn,StepSize):
 
 #def Solve_to(t0,t1,x0,DeltaTMax,SolverToUse,FuncToSolve):
 def Solve_to(FuncToSolve,x0,tspan,DeltaTMax,SolverToUse,):
+    #print(tspan)
     t0,t1 = tspan
     NSteps = math.ceil((t1-t0)/DeltaTMax) #Whole Number of step size
     StepSize = (t1-t0)/NSteps #Creates Step size less than maximum
