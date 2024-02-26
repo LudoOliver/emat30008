@@ -4,10 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 #%% General
 
-def EulerStep(Ftx, Xn, Tn,StepSize):
+def EulerStep(Ftx, Xn, Tn,StepSize=0.001):
     return np.add(Xn,StepSize*Ftx(Xn,Tn))
 
-def RungeKutta4(Ftx,Xn,Tn,StepSize):
+def RungeKutta4(Ftx,Xn,Tn,StepSize=0.001):
     k1 = Ftx(Xn,Tn)
     k2 = Ftx(Xn+StepSize*k1/2,Tn+(StepSize/2))
     k3 = Ftx(Xn+StepSize*k2/2,Tn+StepSize/2)
@@ -21,7 +21,7 @@ def Solve_to(FuncToSolve,x0,tspan,DeltaTMax,SolverToUse,):
     NSteps = math.ceil((t1-t0)/DeltaTMax) #Whole Number of step size
     StepSize = (t1-t0)/NSteps #Creates Step size less than maximum
     TArray = np.linspace(t0,t1,NSteps)
-    XArray = np.zeros([len(x0),NSteps])
+    XArray = np.zeros([np.size(x0),NSteps])
     XArray[:,0] = x0
     for i in range(1,NSteps):
         XArray[:,i] = SolverToUse(FuncToSolve,XArray[:,i-1],TArray[i-1],StepSize)

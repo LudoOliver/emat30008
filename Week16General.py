@@ -28,7 +28,7 @@ Time = [0,100]
 
 
 def SingleShot(EqnToSolve,ShootArray,StepSize,Solver):
-   StartConditions = ShootArray[0:2]
+   StartConditions = ShootArray[0:-1]
    Period = ShootArray[-1]
    x,t = ODESolver.Solve_to(EqnToSolve,StartConditions,[0,Period],StepSize,Solver)
    G = StartConditions-x[:,-1] #Difference between output and input
@@ -40,7 +40,7 @@ ShootGuess = np.array([0.3,0.3,32])
 
 
 
-def Shooting(EqnToSolve,X0,T0,StepSize=0.01,Solver=ODESolver.RungeKutta4):
+def Shooting(EqnToSolve,X0,T0,StepSize=0.001,Solver=ODESolver.RungeKutta4):
    """
     Input:
         EqnToSolve : Function of(x,t)
@@ -56,7 +56,7 @@ def Shooting(EqnToSolve,X0,T0,StepSize=0.01,Solver=ODESolver.RungeKutta4):
             -default is RungeKutta4
         StepSize:
             -Step size used in for numerical integration
-            -default = 0.01
+            -default = 0.001
     Output:
         X: Array matching dimensions X0
             -the location of the limit cycle in x space
