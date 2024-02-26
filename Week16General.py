@@ -40,7 +40,7 @@ ShootGuess = np.array([0.3,0.3,32])
 
 
 
-def Shooting(EqnToSolve,X0,T0,**kwargs):
+def Shooting(EqnToSolve,X0,T0,StepSize=0.01,Solver=ODESolver.RungeKutta4):
    """
     Input:
         EqnToSolve : Function of(x,t)
@@ -56,21 +56,13 @@ def Shooting(EqnToSolve,X0,T0,**kwargs):
             -default is RungeKutta4
         StepSize:
             -Step size used in for numerical integration
+            -default = 0.01
     Output:
         X: Array matching dimensions X0
             -the location of the limit cycle in x space
         T: Scalar    
             -the time period of the limit   
    """
-   if 'StepSize' in kwargs:
-       StepSize = kwargs['StepSize']
-       #print("worked")
-   else:
-       StepSize=0.01    
-   if 'Solver' in kwargs:
-       Solver = kwargs.solver
-   else:
-       Solver = ODESolver.RungeKutta4
    ShootArray = np.append(X0,T0)
    try:
        CycleVector = scipy.optimize.root(lambda ShootArray: SingleShot(EqnToSolve,ShootArray,StepSize,Solver),ShootArray)
