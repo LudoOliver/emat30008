@@ -25,6 +25,15 @@ def NormalFormHopf(u,t):
         #print("Error")
         #return 
     return np.array([du1,du2])
+def ShootingHopfTest():
+    FoundX,FoundPeriod= Week16General.Shooting(NormalFormHopf, X0, T0, StepSize=0.0001)
+    Error = math.sqrt(Beta)*math.sin(math.acos(FoundX[0])/math.sqrt(Beta))-FoundX[1]
+    if abs(Error)<0.05:
+        print("Success")
+        return True
+    else:
+        print("Failiure")
+        return False    
 X0 =[0.1,0.1]
 T0 = 8
 FoundX,FoundPeriod= Week16General.Shooting(NormalFormHopf, X0, T0, StepSize=0.0001)
