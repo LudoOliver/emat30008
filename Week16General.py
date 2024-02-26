@@ -64,7 +64,7 @@ def Shooting(EqnToSolve,X0,T0,**kwargs):
    """
    if 'StepSize' in kwargs:
        StepSize = kwargs['StepSize']
-       print("worked")
+       #print("worked")
    else:
        StepSize=0.01    
    if 'Solver' in kwargs:
