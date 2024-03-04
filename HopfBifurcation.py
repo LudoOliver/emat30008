@@ -79,8 +79,8 @@ def ShootingThreeHopf(Tolerance=0.5,X0=[0.1,0.1,1e-9],T0=8):
         return 0  
     
         
-#Answer=ShootingHopfTestProper(0.05)      
-#Answer2=ShootingThreeHopf(0.1)  
+Answer=ShootingHopfTestProper(0.05)      
+Answer2=ShootingThreeHopf(0.1)  
 #%%   
 X0 =[0.1,0.1]
 T0 = 8

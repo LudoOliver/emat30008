@@ -37,8 +37,8 @@ def SingleShot(EqnToSolve,ShootArray,StepSize,Solver):
    return G
 
 ShootGuess = np.array([0.3,0.3,32])
-
-
+ShootX = np.array([0.1,0.1])
+ShootT=32
 
 def Shooting(EqnToSolve,X0,T0,StepSize=0.001,Solver=ODESolver.RungeKutta4):
    """
@@ -66,6 +66,7 @@ def Shooting(EqnToSolve,X0,T0,StepSize=0.001,Solver=ODESolver.RungeKutta4):
    ShootArray = np.append(X0,T0)
    try:
        CycleVector = scipy.optimize.root(lambda ShootArray: SingleShot(EqnToSolve,ShootArray,StepSize,Solver),ShootArray)
+       #print("Success")
    except:
        print("Error: Try Checking Your Initial Condition or Decreasing Your Stepsize")
        return 
@@ -78,14 +79,17 @@ def Shooting(EqnToSolve,X0,T0,StepSize=0.001,Solver=ODESolver.RungeKutta4):
 
 
 #%%
-#FoundX,FoundY,FoundPeriod = Shooting(predator_prey,ShootGuess)
-#print(Solution)
-#FoundX,FoundY,FoundTime
-#FoundICs = [FoundX,FoundY]
-#FoundTime = [0, FoundPeriod]
-#x,t = ODESolver.Solve_to(predator_prey,FoundICs,FoundTime,MinStep,ODESolver.RungeKutta4)
-#plt.plot(x[0,:],x[1,:]) 
-#plt.plot(t,x[1,:]) #Shows that period is roughly 32 for b= 0.1 and a 
-#plt.show()
-
+def main():
+    FoundX,FoundPeriod = Shooting(predator_prey,ShootX,ShootT)
+# print(Solution)
+# FoundX,FoundY,FoundTime
+    FoundICs = FoundX
+    FoundTime = [0, FoundPeriod]
+    x,t = ODESolver.Solve_to(predator_prey,FoundICs,FoundTime,MinStep,ODESolver.RungeKutta4)
+    plt.plot(x[0,:],x[1,:]) 
+    #plt.plot(t,x[1,:]) #Shows that period is roughly 32 for b= 0.1 and a 
+    #plt.plot(t,x[0,:])
+    plt.show()
+if __name__ =="__main__":
+    main()
 

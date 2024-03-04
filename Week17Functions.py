@@ -19,3 +19,4 @@ def ModifiedBetaFormHopf(u,t,Beta=1):
     du1 = Beta*u[0]-u[1]+u[0]*(u[0]**2+u[1]**2)*(1-(u[0]**2+u[1]**2))
     du2 = u[0]+Beta*u[1]-u[1]*(u[0]**2+u[1]**2)*(1-(u[0]**2+u[1]**2))
     return np.array([du1,du2])
+
