@@ -64,6 +64,7 @@ def Shooting(EqnToSolve,X0,T0,StepSize=0.001,Solver=ODESolver.RungeKutta4):
             -the time period of the limit   
    """
    ShootArray = np.append(X0,T0)
+   #print(ShootArray,"Shooting on this")
    try:
        CycleVector = scipy.optimize.root(lambda ShootArray: SingleShot(EqnToSolve,ShootArray,StepSize,Solver),ShootArray)
        #print("Success")
