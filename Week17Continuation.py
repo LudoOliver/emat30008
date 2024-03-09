@@ -22,8 +22,8 @@ def ShootingSolveWrapper(Func,t,Param,SolnEstimate):
     x,period = Week16General.Shooting(WrappedFunc, SolnEstimate[:-1], SolnEstimate[-1])#,StepSize=0.0001)
     return np.hstack([x,period])
     
-def NaturalParameterContintuation(Func,X0,Param0,ParamNSteps,ParamStep=0.1):#,discretisation=lambda x:x):
-    ParameterSpace =np.linspace(Param0,Param0+ParamStep*ParamNSteps,ParamNSteps)
+def NaturalParameterContintuation(Func,X0,Param0,ParamNSteps,ParamStepSize=0.1):#,discretisation=lambda x:x):
+    ParameterSpace =np.linspace(Param0,Param0+ParamStepSize*ParamNSteps,ParamNSteps)
     SolutionSpace = np.zeros([ParamNSteps,(np.size(X0))])
     SolutionSpace[0,:] = scipy.optimize.root(lambda x: Func(x,1,Param0),X0).x
     for i in range(1,ParamNSteps):
@@ -32,11 +32,12 @@ def NaturalParameterContintuation(Func,X0,Param0,ParamNSteps,ParamStep=0.1):#,di
     return SolutionSpace, ParameterSpace 
 
     
-def ShootingNumericalContinuation(Func,X0,Param0,ParamNSteps=10,ParamStepSize=0.1):
+def ShootingNumericalContinuation(Func,X0,Param0,ParamNSteps=10,ParamStepSize=0.1,SolverStepSize=0.1):
+    #0.1 Is recomended as it is incredibly slow for Modified Btea From
     ParameterSpace =np.linspace(Param0,Param0+ParamStepSize*ParamNSteps,ParamNSteps)
     SolutionSpace = np.zeros([ParamNSteps,(np.size(X0))])
     Initial = lambda u,t :Func(u, t,Param0)
-    SolutionSpace[0,:-1],SolutionSpace[0,-1] = Week16General.Shooting(Initial, X0[0:-1], X0[-1]) #could be unpack issues
+    SolutionSpace[0,:-1],SolutionSpace[0,-1] = Week16General.Shooting(Initial, X0[0:-1], X0[-1],SolverStepSize=0.1) #could be unpack issues
     for i in range(1,ParamNSteps):
         #Current = lambda u,t :Func(u, t,ParameterSpace[i])
         #SolutionSpace[i,:-1],SolutionSpace[i,-1] = Week16General.Shooting(Current, SolutionSpace[i-1,:-1], SolutionSpace[i-1,-1])
@@ -47,7 +48,9 @@ def ShootingNumericalContinuation(Func,X0,Param0,ParamNSteps=10,ParamStepSize=0.
 
 def OneArcLengthCont(func,SolnArray,ParamArray):
     ParamSecant = ParamArray[-1]-ParamArray[-2]
-    SolnArray = SolnArray[:,-1]-ParamArray[:,-2]
+    SolnSecant = SolnArray[:,-1]-SolnArray[:,-2]
+    
+    
     
 
 

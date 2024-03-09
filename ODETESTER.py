@@ -4,8 +4,10 @@ from Week17Functions import *
 import ODESolver
 Param0 = 2
 FixBeta = lambda u,t :ModifiedBetaFormHopf(u, t,Param0)
-x,t = ODESolver.Solve_to(FixBeta,[1.1,1.1],[0,30])
-
+x,t = ODESolver.Solve_to(FixBeta,[2.1,0],[0,50])
+plt.plot(t,x[0,:])
+plt.plot(t,x[1,:])
+plt.plot(x[0,:],x[1,:])
 import numpy as np
 import matplotlib.pyplot as plt
 #%matplotlib inline
