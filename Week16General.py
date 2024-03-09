@@ -10,9 +10,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import ODESolver
-a = 1
-d = 0.1
-b = 0.1
+
 
 def predator_prey(x,t):
    #print(x)
@@ -21,9 +19,6 @@ def predator_prey(x,t):
    return np.array([dx , dy])
 #print((6)(1))
 
-InitCon = np.array([0.1,0.1])
-MinStep = 0.1
-Time = [0,100]
 
 
 
@@ -36,9 +31,7 @@ def SingleShot(EqnToSolve,ShootArray,StepSize,Solver):
    G = np.append(G,EqnToSolve(x[:,-1],0)[0]) #Adds the 0 derrivative phase condition
    return G
 
-ShootGuess = np.array([0.3,0.3,32])
-ShootX = np.array([0.1,0.1])
-ShootT=32
+
 
 def Shooting(EqnToSolve,X0,T0,StepSize=0.001,Solver=ODESolver.RungeKutta4):
    """
@@ -47,7 +40,7 @@ def Shooting(EqnToSolve,X0,T0,StepSize=0.001,Solver=ODESolver.RungeKutta4):
             -the ODE to integrate
         X0 : Array
             -the initial conditions
-            -should be in close to the suspcted limit cycle
+            -should be as close to the suspected limit cycle as possible
         T : Scalar
             - an approxmiation of the cycles period
         Solver: Function
@@ -81,6 +74,15 @@ def Shooting(EqnToSolve,X0,T0,StepSize=0.001,Solver=ODESolver.RungeKutta4):
 
 #%%
 def main():
+    a = 1
+    d = 0.1
+    b = 0.1
+    InitCon = np.array([0.1,0.1])
+    MinStep = 0.1
+    Time = [0,100]
+    ShootGuess = np.array([0.3,0.3,32])
+    ShootX = np.array([0.1,0.1])
+    ShootT=32
     FoundX,FoundPeriod = Shooting(predator_prey,ShootX,ShootT)
 # print(Solution)
 # FoundX,FoundY,FoundTime
