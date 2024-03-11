@@ -1,16 +1,10 @@
-# Problem 1
-
-### Main problems - How do i work through this ive got 3 unkowns im trying to find roots of right?
-### unlesss i x corrrealte to find period wtf do i do
-### do i just care about finding a single co-ordinate?
-### would it be easisest to just iterate for ages and find repeated section in
 
 import scipy
 import math
 import numpy as np
 import matplotlib.pyplot as plt
 import ODESolver
-
+from scipy.optimize import root
 
 def predator_prey(x,t):
    #print(x)
@@ -22,19 +16,27 @@ def predator_prey(x,t):
 
 
 
-def SingleShot(EqnToSolve,ShootArray,StepSize,Solver):
-   StartConditions = ShootArray[0:-1]
-   Period = ShootArray[-1]
-   x,t = ODESolver.Solve_to(EqnToSolve,StartConditions,[0,Period],StepSize,Solver)
-   G = StartConditions-x[:,-1] #Difference between output and input
-   #print(G)
-   G = np.append(G,EqnToSolve(x[:,-1],0)[0]) #Adds the 0 derrivative phase condition
-   return G
+def SingleShot(ShootArray,StepSize,Solver,EqnToSolve):
+    """The root finding problem
 
+    Args:
+        ShootArray ([Array],Scalar): X0, Time period
+        StepSize (float): Solver step size
+        Solver (function): ode solver to use
+        EqnToSolve (function): chosen numerical integrator
 
+    Returns:
+        Numpy array of X(0)-X(T) stacked upon dx_1/dt
+    """
+    StartConditions = ShootArray[0:-1]
+    Period = ShootArray[-1]
+    x,t = ODESolver.Solve_to(EqnToSolve,StartConditions,[0,Period],StepSize,Solver)
+    G = StartConditions-x[:,-1] #Difference between output and input
+    G = np.append(G,EqnToSolve(x[:,-1],0)[0]) #Adds the 0 derrivative phase condition
+    return G
 
 def Shooting(EqnToSolve,X0,T0,StepSize=0.001,Solver=ODESolver.RungeKutta4):
-   """
+    """
     Input:
         EqnToSolve : Function of(x,t)
             -the ODE to integrate
@@ -55,20 +57,26 @@ def Shooting(EqnToSolve,X0,T0,StepSize=0.001,Solver=ODESolver.RungeKutta4):
             -the location of the limit cycle in x space
         T: Scalar    
             -the time period of the limit   
-   """
-   ShootArray = np.append(X0,T0)
-   #print(ShootArray,"Shooting on this")
-   try:
-       CycleVector = scipy.optimize.root(lambda ShootArray: SingleShot(EqnToSolve,ShootArray,StepSize,Solver),ShootArray)
-       #print("Success")
-   except:
-       print("Error: Try Checking Your Initial Condition or Decreasing Your Stepsize")
-       return 
-    #print(CycleVector.x)
-   return CycleVector.x[:-1],CycleVector.x[-1] #find solution for a given array, should generalise with some modification
-
-#Test = SingleShot(predator_prey,ShootGuess)
-#print(Test,"worked")
+    """
+    ShootArray = np.append(X0,T0)
+    InitialGuess = np.append(X0,T0)
+    try:
+        OutputDim= EqnToSolve(X0,1)
+    except:
+        print("Error: Invalid X0")
+        return 0
+    if np.size(OutputDim)!=np.size(X0):
+        print("Error: Dimension of X0 is too large")
+        return 0
+    try:    
+        #CycleVector = scipy.optimize.root(lambda ShootArray: SingleShot(ShootArray,StepSize,Solver),ShootArray)
+        #NewVector = root(SingleShot,InitialGuess,args=SingleShotArgs).x
+        SolnVec = root(NewSingleShot,InitialGuess,args=(StepSize,Solver,EqnToSolve)).x#,args=SingleShotArgs).x
+    except:
+        print("Shooting Error: Try Checking Your Initial Condition or Decreasing Your Stepsize")
+        return 0
+        #print(CycleVector.x)
+    return SolnVec[:-1],SolnVec[-1] #
 
 
 
@@ -81,7 +89,8 @@ def main():
     MinStep = 0.1
     Time = [0,100]
     ShootGuess = np.array([0.3,0.3,32])
-    ShootX = np.array([0.1,0.1])
+    #ShootX = np.array([0.1,0.1])
+    ShootX = np.array([1,3,4,5])
     ShootT=32
     FoundX,FoundPeriod = Shooting(predator_prey,ShootX,ShootT)
 # print(Solution)
@@ -94,5 +103,31 @@ def main():
     #plt.plot(t,x[0,:])
     plt.show()
 if __name__ =="__main__":
+    a = 1
+    d = 0.1
+    b = 0.1
+    InitCon = np.array([0.1,0.1])
+    MinStep = 0.1
+    Time = [0,100]
+    ShootGuess = np.array([0.3,0.3,32])
+    ShootX = np.array([0.1,0.1])
     main()
 
+""" Junk code, kept for testing /if i need to go back quickly
+    def SingleShot(ShootArray,StepSize=StepSize,Solver=Solver):
+        StartConditions = ShootArray[0:-1]
+        Period = ShootArray[-1]
+        x,t = ODESolver.Solve_to(EqnToSolve,StartConditions,[0,Period],StepSize,Solver)
+        G = StartConditions-x[:,-1] #Difference between output and input
+        G = np.append(G,EqnToSolve(x[:,-1],0)[0]) #Adds the 0 derrivative phase condition
+        return G
+    SingleShotArgs = (StepSize,Solver)
+def SingleShot(EqnToSolve,ShootArray,StepSize,Solver):
+   StartConditions = ShootArray[0:-1]
+   Period = ShootArray[-1]
+   x,t = ODESolver.Solve_to(EqnToSolve,StartConditions,[0,Period],StepSize,Solver)
+   G = StartConditions-x[:,-1] #Difference between output and input
+   #print(G)
+   G = np.append(G,EqnToSolve(x[:,-1],0)[0]) #Adds the 0 derrivative phase condition
+   return G
+"""
