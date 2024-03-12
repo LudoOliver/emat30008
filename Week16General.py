@@ -28,6 +28,7 @@ def SingleShot(ShootArray,StepSize,Solver,EqnToSolve):
     Returns:
         Numpy array of X(0)-X(T) stacked upon dx_1/dt
     """
+    #print(f"Passed array was {ShootArray}")
     StartConditions = ShootArray[0:-1]
     Period = ShootArray[-1]
     x,t = ODESolver.Solve_to(EqnToSolve,StartConditions,[0,Period],StepSize,Solver)
@@ -71,7 +72,7 @@ def Shooting(EqnToSolve,X0,T0,StepSize=0.001,Solver=ODESolver.RungeKutta4):
     try:    
         #CycleVector = scipy.optimize.root(lambda ShootArray: SingleShot(ShootArray,StepSize,Solver),ShootArray)
         #NewVector = root(SingleShot,InitialGuess,args=SingleShotArgs).x
-        SolnVec = root(NewSingleShot,InitialGuess,args=(StepSize,Solver,EqnToSolve)).x#,args=SingleShotArgs).x
+        SolnVec = root(SingleShot,InitialGuess,args=(StepSize,Solver,EqnToSolve)).x#,args=SingleShotArgs).x
     except:
         print("Shooting Error: Try Checking Your Initial Condition or Decreasing Your Stepsize")
         return 0

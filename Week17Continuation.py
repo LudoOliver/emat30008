@@ -8,7 +8,7 @@ Created on Mon Feb 26 15:30:33 2024
 from CommonModules import *
 import Week16General
 import Week17Functions
-
+import ODESolver
 def SimpleSolveWrapper(Func,t,Param,SolnEstimate):
     WrappedFunc = lambda x: Func(x,t,Param)
     return scipy.optimize.root(WrappedFunc,SolnEstimate).x
@@ -64,7 +64,10 @@ def NaturalContinuation(Func,X0,Param0,WithShooting=0,ParamNSteps=10,ParamStepSi
 
 
 
-def ShootingArcLengthCont(Func,X0,ParamBounds,MaxSteps,FirstStepSize=0.1,WithShooting=1):
+def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
+                        ParamStepSize=0.1,WithShooting=1,Solver=ODESolver.RungeKutta4,
+                        SolverStepSize=0.1
+                        ):
     
     P0,PN = ParamBounds[0],ParamBounds[1]
     Direction = np.sign(PN-P0)
@@ -72,11 +75,11 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,MaxSteps,FirstStepSize=0.1,WithSho
     ParamSpace = np.empty(MaxSteps)+np.nan
     SolnSpace = np.empty(np.size(X0),MaxSteps)+np.nan
     
-    ParamSpace[0],ParamSpace[1] = ParamBounds[0],ParamBounds[0]+Direction*FirstStepSize
+    ParamSpace[0],ParamSpace[1] = ParamBounds[0],ParamBounds[0]+Direction*ParamStepSize
     SolnSpace[0,:] = ShootingSolveWrapper(Func,1,ParamSpace[0],X0)
     SolnSpace[1,:] = ShootingSolveWrapper(Func,1,ParamSpace[1],SolnSpace[0,:])
     
-    def ArcShootRootFind(SolnAndParam):
+    def OldArcShootRootFind(SolnAndParam):
         
         SolnToInvestigate,ParamToInvestigate = SolnAndParam[0],SolnAndParam[1]
         Period = SolnToInvestigate[-1]
@@ -92,8 +95,20 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,MaxSteps,FirstStepSize=0.1,WithSho
         
         return np.array([XCondition,PhaseCondition,ArcCondition])
     
+    def ArcShootRootFind(SolnAndParam):
+        
+        SolnToInvestigate,ParamToInvestigate = SolnAndParam[0],SolnAndParam[1]
+        FuncAtParam = lambda x,t : Func(x,t,ParamToInvestigate)
+        SingleShotArgs = (SolverStepSize,Solver,FuncAtParam)
+        
+        ShootingLHS = Week16General.SingleShot(SolnToInvestigate,SolverStepSize,Solver,FuncAtParam)
+        ArcCondition = (np.dot(ParamSecant,(ParamToInvestigate-ParamEstimate))+
+                                np.dot(SolnSecant,(SolnToInvestigate-SolnEstimate)))
+        ArcLengthRHS = np.append(ShootingLHS,ArcCondition)
+        
+        return ArcLengthRHS
     
-    for i in range(2,MaxSteps):
+    for i in range(2,ContinuationMaxSteps):
         if min(ParamBounds) < ParamSpace[i-1] < max(ParamBounds):
             #SolnSecant =Soln[i-1]-SolnOlder
             #ParamSecant =ParamOld-ParamOlder # this could be done in the loop, would make it easier
