@@ -25,4 +25,7 @@ v = x/np.sqrt(x**2 + y**2)
 plt.quiver(x,y,u,v)
 plt.show()
 #%%
+print(1+[1,2])
 
+
+# %%

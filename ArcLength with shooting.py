@@ -52,27 +52,28 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
     
     def ArcShootRootFind(SolnAndParam):
         
-        SolnToInvestigate,ParamToInvestigate = SolnAndParam[:-1],SolnAndParam[-1]
+        SolnToInvestigate,ParamToInvestigate = SolnAndParam[:-1],SolnAndParam[-1] 
+        #Unpacking u,P array - paired together for ease of use with scipy solve
         FuncAtParam = lambda x,t : Func(x,t,ParamToInvestigate)
-        SingleShotArgs = (SolverStepSize,Solver,FuncAtParam)
-        
+        #SingleShotArgs = (SolverStepSize,Solver,FuncAtParam)
+        #Fixing function to current param value
         ShootingLHS = Week16General.SingleShot(SolnToInvestigate,SolverStepSize,Solver,FuncAtParam)
+        #Shooting root finding problem
         ArcCondition = (np.dot(ParamSecant,(ParamToInvestigate-ParamEstimate))+
                                 np.dot(SolnSecant,(SolnToInvestigate-SolnEstimate)))
+        #Arc length condition, using previous solutions from the local scope
         ArcLengthRHS = np.append(ShootingLHS,ArcCondition)
         
-        return ArcLengthRHS
+        return ArcLengthRHS 
     
     for i in range(2,ContinuationMaxSteps):
         if min(ParamBounds) < ParamSpace[i-1] < max(ParamBounds):
-            #SolnSecant =Soln[i-1]-SolnOlder
-            #ParamSecant =ParamOld-ParamOlder # this could be done in the loop, would make it easier
             ParamSecant = ParamSpace[i-1]-ParamSpace[i-2]
             SolnSecant = SolnSpace[i-1,:]-SolnSpace[i-2,:]
             SolnEstimate = SolnSpace[i-1,:]+SolnSecant
-            ParamEstimate = ParamSpace[i-1]+ParamSecant
-            #print([SolnEstimate,ParamEstimate])
-            #print(np.append(SolnEstimate,ParamEstimate))
+            ParamEstimate = ParamSpace[i-1]+ParamSecant 
+            #Using the scope of nested function definitions to reduce difficulty passing arguments
+
             SolnAndParam = np.append(SolnEstimate,ParamEstimate)
             Result = scipy.optimize.root(ArcShootRootFind,SolnAndParam).x
             print(Result)
