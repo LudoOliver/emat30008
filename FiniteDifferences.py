@@ -28,25 +28,47 @@ def BratuTerm(x,U,mu=0.1):
 
 def FiniteSolvePoisson(Bounds,
                         DiffusionConstant=1,Reaction=NoSourceTerm,
-                        MaxStepSize=0.01,Guess=0):
-    #Gamma1 = 1 #definitely should change
-    #Gamma2 = 10
-
-    X0 = Bounds[0,0]
-    XN = Bounds[0,1]
-    U0 = Bounds[1,0]
-    UN = Bounds[1,1]
+                        NPoints=100,Guess=0,
+                        Robin=0,
+                        Neuman=0):
     
+    
+    # Just realised my step size idea sucks should just use npoints lol
+    # Thats fine tho should be easy fix
+    # Unsure about how different lengths should be
+    # Should also be able to do different length scales some point
+    
+    X0 = Bounds[0,0]
+    U0 = Bounds[1,0]
+    XN = Bounds[0,1]
     if Guess.any():
-        #print("Guess was true")
         NPoints = len(Guess)
+        DeltaX = (XN-X0)/NPoints
         U = Guess
     else:
-        NPoints = math.ceil((abs(XN-X0))/MaxStepSize)
+        #NPoints = math.ceil((abs(XN-X0))/MaxStepSize)
+        DeltaX = (XN-X0)/NPoints
         U = np.zeros(NPoints)
         
+    #TrueStepSize = (XN-X0)/NPoints
     
-    TrueStepSize = (XN-X0)/NPoints
+    if Neuman and Robin:
+        print("Error: Please specify only one type of boundary conditions")
+        return 0
+    elif Robin:
+        delta = Bounds[1,1]
+        UN = 2*delta*DeltaX
+        gamma = Bounds[2,1]
+        EndVector = (2,-1*(1+gamma*DeltaX))
+    elif Neuman:
+        delta = Bounds[1,1]
+        UN = 2*delta*DeltaX
+        EndVector = (2,-2)
+    else:
+        NPoints=NPoints-1
+        U= U[:-1]
+        UN = Bounds[1,1]
+        EndVector = (1,-2)    
     
     XSpace = np.linspace(X0,XN,num=NPoints)
     #print(XSpace[2]-XSpace[1]+TrueStepSize)
@@ -55,7 +77,7 @@ def FiniteSolvePoisson(Bounds,
     CoeffVector = np.array([-1,0,1])
     for i in range(1,len(CoeffMatrix)-1):
         CoeffMatrix[i,i+CoeffVector] = (1,-2,1)
-    CoeffMatrix[-1,(-2,-1)] = (1,-2)
+    CoeffMatrix[-1,(-2,-1)] = EndVector
     print(CoeffMatrix)
     
     #U = np.zeros(NPoints)
@@ -66,7 +88,7 @@ def FiniteSolvePoisson(Bounds,
         
     
     def EqnToSolve(SolnArray):
-        return DiffusionConstant*(CoeffMatrix.dot(SolnArray)+U)/(TrueStepSize**2)+Reaction(XSpace,SolnArray)
+        return DiffusionConstant*(CoeffMatrix.dot(SolnArray)+U)/(DeltaX**2)+Reaction(XSpace,SolnArray)
         
     Ans = scipy.optimize.root(EqnToSolve,U)
     
@@ -86,18 +108,26 @@ def ExpectedSoln(BoundaryCond,Xarray,DiffusionConst=1):
     UN = BoundaryCond[1,1]
     Soln = np.add((-1/(2*DiffusionConst))*np.multiply((Xarray-X0),(Xarray-XN)),(UN-U0)/(XN-X0)*(Xarray-X0)+U0)
     return Soln
-
+#%%
 if __name__ == "__main__":
     X0 = 0
     U0 = 0
     XN = 1
     UN = 0
-    BoundaryCond = np.array([[X0,XN],[U0,UN]]) 
     
+    delta =1
+    gamma =1
+    
+    DlechtBCs = np.array([[X0,XN],[U0,UN]]) 
+    NeumanBCs = np.array([[X0,XN],[U0,delta]]) #For du/dx|Xn = delta
+    RobinBCS = np.array([[X0,XN],[U0,delta],[0,gamma]]) #For du/dx|Xn = delta-gamma*u(Xn)
+    print(RobinBCS)
+    #%%
     #_,GuessForBratu = FiniteSolvePoisson(Bounds=BoundaryCond,Reaction=SimpleSourceTerm)
     XForGuess = np.linspace(X0,XN,num=40)
-    GuessForBratu =ExpectedSoln(BoundaryCond,XForGuess)
-    X,U = FiniteSolvePoisson(Bounds=BoundaryCond,Reaction=BratuTerm,Guess=GuessForBratu)
+    GuessForBratu =ExpectedSoln(DlechtBCs,XForGuess)
+    
+    X,U = FiniteSolvePoisson(Bounds=DlechtBCs,Reaction=BratuTerm,Guess=GuessForBratu)
     
 
     plt.figure()
