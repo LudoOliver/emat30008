@@ -15,10 +15,6 @@ def SimpleSolveWrapper(Func,t,Param,SolnEstimate):
 
 def ShootingSolveWrapper(Func,t,Param,SolnEstimate):
     WrappedFunc = lambda u,t :Func(u, t,Param)
-    #print(SolnEstimate[:-1])
-    #print(SolnEstimate[-1])
-    print(Param)
-    #print(SolnEstimate)
     x,period = Week16General.Shooting(WrappedFunc, SolnEstimate[:-1], SolnEstimate[-1])#,StepSize=0.0001)
     return np.hstack([x,period])
     
@@ -53,8 +49,7 @@ def NaturalContinuation(Func,X0,Param0,WithShooting=0,ParamNSteps=10,ParamStepSi
         WrapperToUse = ShootingSolveWrapper
     else:
         WrapperToUse = SimpleSolveWrapper
-    #Could be clever putting IC's to front?
-    SolutionSpace[-1,:] = X0
+    SolutionSpace[-1,:] = X0 #Uses last part of solution as temporary storage for initial approximation
     for i in range(0,ParamNSteps):
         SolutionSpace[i,:] = WrapperToUse(Func,1,ParameterSpace[i],SolutionSpace[i-1,:])
     return SolutionSpace ,ParameterSpace
@@ -68,7 +63,22 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
                         ParamStepSize=0.1,WithShooting=1,Solver=ODESolver.RungeKutta4,
                         SolverStepSize=0.1
                         ):
-    
+    """_summary_
+
+    Args:
+        Func (_type_): _description_
+        X0 (_type_): array of [x1...xn,t]
+        ParamBounds (_type_): range of parameter to check across
+        ContinuationMaxSteps (_type_): max number of iterations
+        ParamStepSize (float, optional): First step in parameter space, Defaults to 0.1.
+        WithShooting (int, optional): Shooting on/off, Defaults to 1.
+        Solver (_type_, optional): integrator to use, Defaults to ODESolver.RungeKutta4.
+        SolverStepSize (float, optional): stepsize of numerical integrator, Defaults to 0.1.
+
+    Returns:
+        SolnSpace: 2d array of solutions
+        ParamSpace: 1d array of corresponding parameters
+    """
     P0,PN = ParamBounds[0],ParamBounds[1]
     Direction = np.sign(PN-P0)
     #ParamArray = np.linspace(P0,PN,num=MaxSteps)
@@ -78,22 +88,6 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
     ParamSpace[0],ParamSpace[1] = ParamBounds[0],ParamBounds[0]+Direction*ParamStepSize
     SolnSpace[0,:] = ShootingSolveWrapper(Func,1,ParamSpace[0],X0)
     SolnSpace[1,:] = ShootingSolveWrapper(Func,1,ParamSpace[1],SolnSpace[0,:])
-    
-    def OldArcShootRootFind(SolnAndParam):
-        
-        SolnToInvestigate,ParamToInvestigate = SolnAndParam[0],SolnAndParam[1]
-        Period = SolnToInvestigate[-1]
-        
-        FuncAtParam = lambda x,t : Func(x,t,ParamToInvestigate)
-        X0 = SolnEstimate[:-1]
-        X,_ = ODESolver.Solve_to(Func,X0,[0,Period],DeltaTMax=0.1)
-        EndX = X[-1,:]
-        XCondition = X-X0
-        PhaseCondition = FuncAtParam(X0)[0]
-        ArcCondition = (np.dot(ParamSecant,(ParamToInvestigate-ParamEstimate))+
-                                np.dot(SolnSecant,(SolnToInvestigate-SolnEstimate)))
-        
-        return np.array([XCondition,PhaseCondition,ArcCondition])
     
     def ArcShootRootFind(SolnAndParam):
         
@@ -133,36 +127,6 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
     #Would need to do natural for first 2
     
     
-    
-    
-    
-    
-    
-def ArcShootingSolveWrapper(Func,t,ParamArray,SolnArray):
-    #Root finding problem
-    
-    
-    
-    
-    
-    
-    WrappedFunc = lambda u,t :Func(u, t,Param)
-    #print(SolnEstimate[:-1])
-    #print(SolnEstimate[-1])
-    print(Param)
-    #print(SolnEstimate)
-    x,period = Week16General.Shooting(WrappedFunc, SolnEstimate[:-1], SolnEstimate[-1])#,StepSize=0.0001)
-    CurrentParam = #SOmething
-    CurrentSoln = #Something
-    #return np.hstack([x,period])    
-    ParamSecant = ParamArray[-1]-ParamArray[-2]
-    SolnSecant = SolnArray[:,-1]-SolnArray[:,-2]
-    ParamCondition = np.dot(ParamSecant,(CurrentParam-ParamArray[-1]-ParamSecant))
-    SolnCondition = np.dot(SolnSecant,(CurrentSoln-SolnArray[-1]-SolnSecant))
-    ArcConditon = ParamCondition+SolnCondition                 
-    x,period = Week16General.Shooting(WrappedFunc, SolnEstimate[:-1], SolnEstimate[-1])#,StepSize=0.0001)
-    
-    return np
     
     
     
