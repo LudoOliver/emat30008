@@ -16,7 +16,19 @@ def RungeKutta4(Ftx,Xn,Tn,StepSize=0.001):
 
 #def Solve_to(t0,t1,x0,DeltaTMax,SolverToUse,FuncToSolve):
 def Solve_to(FuncToSolve,x0,tspan,DeltaTMax=0.0001,SolverToUse=RungeKutta4):#(Ftx, Xn, Tn)):
-    #print(tspan)
+    """
+    Arguements:
+        FuncToSolve: rhs of a ode
+        x0 : array of initial conditions
+        tspan : start and end of timespan to integrate across
+        DeltaTMax : maximum timestep to use, default = 0.001
+        SolverToUse : integrator to use, defualt is RungeKutta4
+        
+
+    Returns:
+        X : 2d array of solutions
+        T : 1d array of time values corresponding to the solutions
+    """
     t0,t1 = tspan
     NSteps = math.ceil((t1-t0)/DeltaTMax) #Whole Number of step size
     StepSize = (t1-t0)/NSteps #Creates Step size less than maximum
