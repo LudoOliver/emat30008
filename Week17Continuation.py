@@ -18,29 +18,29 @@ def ShootingSolveWrapper(Func,t,Param,SolnEstimate):
     x,period = Week16General.Shooting(WrappedFunc, SolnEstimate[:-1], SolnEstimate[-1])#,StepSize=0.0001)
     return np.hstack([x,period])
     
-def NaturalParameterContintuation(Func,X0,Param0,ParamNSteps,ParamStepSize=0.1):#,discretisation=lambda x:x):
-    ParameterSpace =np.linspace(Param0,Param0+ParamStepSize*ParamNSteps,ParamNSteps)
-    SolutionSpace = np.zeros([ParamNSteps,(np.size(X0))])
-    SolutionSpace[0,:] = scipy.optimize.root(lambda x: Func(x,1,Param0),X0).x
-    for i in range(1,ParamNSteps):
-        #CurrentParam = ParameterSpace[i]
-        SolutionSpace[i,:] = SimpleSolveWrapper(Func,1,ParameterSpace[i],SolutionSpace[i-1,:])
-    return SolutionSpace, ParameterSpace 
+#def NaturalParameterContintuation(Func,X0,Param0,ParamNSteps,ParamStepSize=0.1):#,discretisation=lambda x:x):
+#   ParameterSpace =np.linspace(Param0,Param0+ParamStepSize*ParamNSteps,ParamNSteps)
+#    SolutionSpace = np.zeros([ParamNSteps,(np.size(X0))])
+#    SolutionSpace[0,:] = scipy.optimize.root(lambda x: Func(x,1,Param0),X0).x
+#    for i in range(1,ParamNSteps):
+#        #CurrentParam = ParameterSpace[i]
+#        SolutionSpace[i,:] = SimpleSolveWrapper(Func,1,ParameterSpace[i],SolutionSpace[i-1,:])
+#    return SolutionSpace, ParameterSpace 
 
     
-def ShootingNumericalContinuation(Func,X0,Param0,ParamNSteps=10,ParamStepSize=0.1,SolverStepSize=0.1):
+#def ShootingNumericalContinuation(Func,X0,Param0,ParamNSteps=10,ParamStepSize=0.1,SolverStepSize=0.1):
     #0.1 Is recomended as it is incredibly slow for Modified Btea From
-    ParameterSpace =np.linspace(Param0,Param0+ParamStepSize*ParamNSteps,ParamNSteps)
-    SolutionSpace = np.zeros([ParamNSteps,(np.size(X0))])
-    Initial = lambda u,t :Func(u, t,Param0)
-    SolutionSpace[0,:-1],SolutionSpace[0,-1] = Week16General.Shooting(Initial, X0[0:-1], X0[-1],SolverStepSize=0.1) #could be unpack issues
-    for i in range(1,ParamNSteps):
+    #ParameterSpace =np.linspace(Param0,Param0+ParamStepSize*ParamNSteps,ParamNSteps)
+    #SolutionSpace = np.zeros([ParamNSteps,(np.size(X0))])
+    #Initial = lambda u,t :Func(u, t,Param0)
+    #SolutionSpace[0,:-1],SolutionSpace[0,-1] = Week16General.Shooting(Initial, X0[0:-1], X0[-1],SolverStepSize=0.1) #could be unpack issues
+    #for i in range(1,ParamNSteps):
         #Current = lambda u,t :Func(u, t,ParameterSpace[i])
         #SolutionSpace[i,:-1],SolutionSpace[i,-1] = Week16General.Shooting(Current, SolutionSpace[i-1,:-1], SolutionSpace[i-1,-1])
-        SolutionSpace[i,:] = ShootingSolveWrapper(Func,1,ParameterSpace[i],SolutionSpace[i-1,:])
+        #SolutionSpace[i,:] = ShootingSolveWrapper(Func,1,ParameterSpace[i],SolutionSpace[i-1,:])
         
     
-    return SolutionSpace ,ParameterSpace
+    #return SolutionSpace ,ParameterSpace
 
 def NaturalContinuation(Func,X0,Param0,WithShooting=0,ParamNSteps=10,ParamStepSize=0.1,SolverStepSize=0.1):
     ParameterSpace =np.linspace(Param0,Param0+ParamStepSize*ParamNSteps,ParamNSteps)
@@ -51,7 +51,15 @@ def NaturalContinuation(Func,X0,Param0,WithShooting=0,ParamNSteps=10,ParamStepSi
         WrapperToUse = SimpleSolveWrapper
     SolutionSpace[-1,:] = X0 #Uses last part of solution as temporary storage for initial approximation
     for i in range(0,ParamNSteps):
-        SolutionSpace[i,:] = WrapperToUse(Func,1,ParameterSpace[i],SolutionSpace[i-1,:])
+        try:
+            SolutionSpace[i,:] = WrapperToUse(Func,1,ParameterSpace[i],SolutionSpace[i-1,:])
+        except:
+            if i:
+                print(f"Failed to go past parameter= {ParameterSpace[i]}: Returned all successful attempts")
+                return SolutionSpace[:i-1,:] ,ParameterSpace[:i-1]
+            else:
+                print(f"Continuation Failed")
+                return 0,0
     return SolutionSpace ,ParameterSpace
 
 #def ShootingArcLengthWrapper(func,X,Param)
