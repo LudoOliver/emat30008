@@ -9,13 +9,13 @@ from CommonModules import *
 import Week16General
 import Week17Functions
 import ODESolver
-def SimpleSolveWrapper(Func,t,Param,SolnEstimate):
+def SimpleSolveWrapper(Func,t,Param,SolnEstimate,SolverStepSize):
     WrappedFunc = lambda x: Func(x,t,Param)
     return scipy.optimize.root(WrappedFunc,SolnEstimate).x
 
-def ShootingSolveWrapper(Func,t,Param,SolnEstimate):
+def ShootingSolveWrapper(Func,t,Param,SolnEstimate,SolverStepSize):
     WrappedFunc = lambda u,t :Func(u, t,Param)
-    x,period = Week16General.Shooting(WrappedFunc, SolnEstimate[:-1], SolnEstimate[-1])#,StepSize=0.0001)
+    x,period = Week16General.Shooting(WrappedFunc, SolnEstimate[:-1], SolnEstimate[-1],StepSize=SolverStepSize)
     return np.hstack([x,period])
     
 #def NaturalParameterContintuation(Func,X0,Param0,ParamNSteps,ParamStepSize=0.1):#,discretisation=lambda x:x):
@@ -52,7 +52,7 @@ def NaturalContinuation(Func,X0,Param0,WithShooting=0,ParamNSteps=10,ParamStepSi
     SolutionSpace[-1,:] = X0 #Uses last part of solution as temporary storage for initial approximation
     for i in range(0,ParamNSteps):
         try:
-            SolutionSpace[i,:] = WrapperToUse(Func,1,ParameterSpace[i],SolutionSpace[i-1,:])
+            SolutionSpace[i,:] = WrapperToUse(Func,1,ParameterSpace[i],SolutionSpace[i-1,:],SolverStepSize=SolverStepSize)
         except:
             if i:
                 print(f"Failed to go past parameter= {ParameterSpace[i]}: Returned all successful attempts")
