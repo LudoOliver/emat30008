@@ -9,11 +9,11 @@ from CommonModules import *
 import Week16General
 import Week17Functions
 import ODESolver
-def SimpleSolveWrapper(Func,t,Param,SolnEstimate,SolverStepSize):
+def SimpleSolveWrapper(Func,t,Param,SolnEstimate,SolverStepSize=0.001):
     WrappedFunc = lambda x: Func(x,t,Param)
     return scipy.optimize.root(WrappedFunc,SolnEstimate).x
 
-def ShootingSolveWrapper(Func,t,Param,SolnEstimate,SolverStepSize):
+def ShootingSolveWrapper(Func,t,Param,SolnEstimate,SolverStepSize=0.001):
     WrappedFunc = lambda u,t :Func(u, t,Param)
     x,period = Week16General.Shooting(WrappedFunc, SolnEstimate[:-1], SolnEstimate[-1],StepSize=SolverStepSize)
     return np.hstack([x,period])
@@ -90,8 +90,8 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
     P0,PN = ParamBounds[0],ParamBounds[1]
     Direction = np.sign(PN-P0)
     #ParamArray = np.linspace(P0,PN,num=MaxSteps)
-    ParamSpace = np.empty(MaxSteps)+np.nan
-    SolnSpace = np.empty(np.size(X0),MaxSteps)+np.nan
+    ParamSpace = np.empty(ContinuationMaxSteps)+np.nan
+    SolnSpace = np.empty((ContinuationMaxSteps,np.size(X0)))+np.nan
     
     ParamSpace[0],ParamSpace[1] = ParamBounds[0],ParamBounds[0]+Direction*ParamStepSize
     SolnSpace[0,:] = ShootingSolveWrapper(Func,1,ParamSpace[0],X0)
@@ -99,7 +99,7 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
     
     def ArcShootRootFind(SolnAndParam):
         
-        SolnToInvestigate,ParamToInvestigate = SolnAndParam[0],SolnAndParam[1]
+        SolnToInvestigate,ParamToInvestigate = SolnAndParam[:-1],SolnAndParam[-1]
         FuncAtParam = lambda x,t : Func(x,t,ParamToInvestigate)
         SingleShotArgs = (SolverStepSize,Solver,FuncAtParam)
         
@@ -111,23 +111,31 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
         return ArcLengthRHS
     
     for i in range(2,ContinuationMaxSteps):
-        if min(ParamBounds) < ParamSpace[i-1] < max(ParamBounds):
+        if True: # min(ParamBounds) < ParamSpace[i-1] < max(ParamBounds):
             #SolnSecant =Soln[i-1]-SolnOlder
             #ParamSecant =ParamOld-ParamOlder # this could be done in the loop, would make it easier
             ParamSecant = ParamSpace[i-1]-ParamSpace[i-2]
             SolnSecant = SolnSpace[i-1,:]-SolnSpace[i-2,:]
             SolnEstimate = SolnSpace[i-1,:]+SolnSecant
             ParamEstimate = ParamSpace[i-1]+ParamSecant
-            
-            Result = scipy.optimize.root(ArcShootRootFind,[SolnEstimate,ParamEstimate])
+            #print(SolnEstimate,"soln")
+            #print(ParamEstimate,"Param")
+            try:
+                Result = scipy.optimize.root(ArcShootRootFind,np.hstack((SolnEstimate,ParamEstimate))).x
+            except:
+                SolnSpace = np.squeeze([i for i in SolnSpace if not np.isnan(i).all()])
+                ParamSpace = [i for i in ParamSpace if not np.isnan(i)]
+                print(f"Continuation Failed after {i} steps")
+                return SolnSpace,ParamSpace
+                #break
             #NewSoln,NewParam = Result[0],Result[1]
-            SolnSpace[i,:] = Result[0]
-            ParamSpace[i] = Result[1]
+            SolnSpace[i,:] = Result[:-1]
+            ParamSpace[i] = Result[-1]
             
         else:
             SolnSpace = np.squeeze([i for i in SolnSpace if not np.isnan(i).all()])
             ParamSpace = [i for i in ParamSpace if not np.isnan(i)]
-            print("Bounds Exceeded")
+            print(f"Bounds exceeded after {i} steps")
             return SolnSpace,ParamSpace
     SolnSpace = np.squeeze([i for i in SolnSpace if not np.isnan(i).all()])
     ParamSpace = [i for i in ParamSpace if not np.isnan(i)]    
@@ -155,3 +163,5 @@ def Main():
 
 if __name__ == "__main__":
     Main()
+    
+
