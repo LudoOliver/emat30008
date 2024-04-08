@@ -76,7 +76,7 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
     Args:
         Func (_type_): _description_
         X0 (_type_): array of [x1...xn,t]
-        ParamBounds (_type_): range of parameter to check across
+        ParamBounds (tuple): range of parameter to check across (A,B)
         ContinuationMaxSteps (_type_): max number of iterations
         ParamStepSize (float, optional): First step in parameter space, Defaults to 0.1.
         WithShooting (int, optional): Shooting on/off, Defaults to 1.
