@@ -2,6 +2,8 @@
 from CommonModules import *
 from EulerStep import EulerStep
 import FiniteDifferences
+
+import matplotlib.animation as animation
 def ExplicitEuler(BoundaryConditions,
                     DiffusionConstant =1,
                     TimeLimit = 1,
@@ -76,6 +78,21 @@ if __name__=="__main__":
                             ,InitalConditions=SinICsAtBcs)
     TrueSoln = ExpectedSoln(X,T,a=X0,b=XN,d=DiffusionConstant)
     
-    plt.plot(Soln[0,:])
-    plt.plot(TrueSoln[0,:]+0.1)
+    num_columns = 100
+    num_rows = 40000
+    def Animate(i):
+        plt.plot(Soln[i,:])
+        plt.plot(TrueSoln[i,:]+0.1)
+    fig = plt.figure()
+    ax = plt.axes(xlim=(0, 1), ylim=(0, 1))
+    line1, = ax.plot([], [], label="Soln", lw=2)
+    line2, = ax.plot([], [], label="True Soln", lw=2)
+    #ax.xlim((0,1))
+    #ax.ylim((0,1))
+    def update(frame):
+        line1.set_data(X, Soln[frame*200,:])
+        line2.set_data(X, TrueSoln[frame*200,:])
+        return line1, line2
+    ani = animation.FuncAnimation(fig, update, frames=int(num_rows/200), blit=True)
+    ax.legend()
     plt.show()
