@@ -28,20 +28,54 @@ def ExplicitEuler(BoundaryConditions,
         return 0
     
     Adx, Bdx = FiniteDifferences.FiniteSolvePoisson(Bounds=BoundaryConditions,
-                                                    NPoints=NPoints,
+                                                    NPoints=NPoints+1,
                                                     Robin=Robin,
                                                     Neuman=Neuman,
                                                     Wrapped=1)
     
     XPoints = np.linspace(X0,XN,num=NPoints)
+    TimePoints = np.linspace(0,TimeLimit,num=NTimeSteps)
     InitialU = InitalConditions(XPoints)
     #if InitialU[0]!=U0 or InitialU[-1]!=UN
-    ULines = np.empty((NPoints,NTimeSteps))
+    print(NTimeSteps)
+    ULines = np.empty((NTimeSteps,NPoints))
+    print(np.shape(ULines))
     ULines[0,:] = InitialU
-    for i in range(1,NTimeSteps+1):
+    for i in range(1,NTimeSteps):
         ULines[i,:] = ULines[i-1,:]+FwdCoefficient*(Adx.dot(ULines[i-1,:])+Bdx)
         
-    return XPoints, InitialU
+    return XPoints,TimePoints,ULines
 
 def SinICs(x,a,b):
     return np.sin(math.pi*(x-a)/(b-a))
+
+def ExpectedSoln(x,t,a,b,d):
+    #SolnLine = np.empty((np.size(x),np.size(t)))
+    Xline = np.sin(math.pi*(x-a)/(b-a))
+    #for i in range(0,len(t)):
+    Tline = np.exp(-d*(math.pi**2)*t/((b-a)**2))
+    SolnLine = np.outer(Xline,Tline).T
+    return SolnLine
+if __name__=="__main__":
+    X0 = 0
+    U0 = 0
+    XN = 1
+    UN = 0
+    
+    delta =1
+    gamma =1
+    
+    DiffusionConstant = 1
+    DlechtBCs = np.array([[X0,XN],[U0,UN]]) 
+    NeumanBCs = np.array([[X0,XN],[U0,delta]]) #For du/dx|Xn = delta
+    RobinBCS = np.array([[X0,XN],[U0,delta],[0,gamma]]) 
+    
+    SinICsAtBcs = lambda x: SinICs(x,a=X0,b=XN)
+    X,T,Soln = ExplicitEuler(DlechtBCs
+                            ,DiffusionConstant=DiffusionConstant
+                            ,InitalConditions=SinICsAtBcs)
+    TrueSoln = ExpectedSoln(X,T,a=X0,b=XN,d=DiffusionConstant)
+    
+    plt.plot(Soln[0,:])
+    plt.plot(TrueSoln[0,:]+0.1)
+    plt.show()
