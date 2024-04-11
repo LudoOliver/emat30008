@@ -99,7 +99,7 @@ def FiniteSolvePoisson(Bounds,
     for i in range(1,len(CoeffMatrix)-1):
         CoeffMatrix[i,i+CoeffVector] = (1,-2,1)
     CoeffMatrix[-1,(-2,-1)] = EndVector
-    print(f"Grid length : {np.sqrt(np.size(CoeffMatrix))}")
+    #print(f"Grid length : {np.sqrt(np.size(CoeffMatrix))}")
     
     #Maybe u=zeros
     U[0] = U0
@@ -110,8 +110,8 @@ def FiniteSolvePoisson(Bounds,
         
     
     def EqnToSolve(SolnArray):
-        return DiffusionConstant*(CoeffMatrix.dot(SolnArray)+U)/(DeltaX**2)+Reaction(XSpace,SolnArray)
-        
+        return DiffusionConstant*(CoeffMatrix.dot(SolnArray)+U)+Reaction(XSpace,SolnArray)*(DeltaX**2) #Working
+        #return DiffusionConstant*(1/DeltaX**2)*(CoeffMatrix.dot(SolnArray)+U)+Reaction(XSpace,SolnArray)
     Ans = scipy.optimize.root(EqnToSolve,U)
     
     #Ans = Ans
@@ -147,16 +147,16 @@ if __name__ == "__main__":
     RobinBCS = np.array([[X0,XN],[U0,delta],[0,gamma]]) #For du/dx|Xn = delta-gamma*u(Xn)
     #print(RobinBCS)
     #%%
-    #_,GuessForBratu = FiniteSolvePoisson(Bounds=BoundaryCond,Reaction=SimpleSourceTerm)
+    #_,GuessForBratu = FiniteSolvePoisson(Bounds=DlechtBCs,Reaction=SimpleSourceTerm)
     XForGuess = np.linspace(X0,XN,num=40+1)
     GuessForBratu = ExpectedSoln(DlechtBCs,XForGuess)
     
-    X,U = FiniteSolvePoisson(Bounds=DlechtBCs,Reaction=BratuTerm)#,Guess=GuessForBratu)
+    X,U = FiniteSolvePoisson(Bounds=DlechtBCs,Reaction=BratuTerm,Guess=GuessForBratu)
     
 
-    X,U = FiniteSolvePoisson(Bounds=DlechtBCs)
-    X,U = FiniteSolvePoisson(Bounds=NeumanBCs,Neuman=1)
-    X,U = FiniteSolvePoisson(Bounds=RobinBCS,Robin=1)
+    #X,U = FiniteSolvePoisson(Bounds=DlechtBCs)
+    #X,U = FiniteSolvePoisson(Bounds=NeumanBCs,Neuman=1)
+    #X,U = FiniteSolvePoisson(Bounds=RobinBCS,Robin=1)
     #print("Should be 99,100,100")
     plt.figure()
     plt.plot(X,U,label="My solution")
