@@ -162,40 +162,36 @@ def FiniteDifferences(  LeftBc,LeftBCLocation,
                                             Left=LeftBc,Right=RightBC,
                                             FromGuess=UFromGuess)
     
-    XSpace = np.linspace(LeftBCLocation,RightBCLocation, num=NPoints)
+    XValues = np.linspace(LeftBCLocation,RightBCLocation, num=NPoints)
+    XSpace = XValues
+    if LeftBc[0][0]=="D":
+        XSpace = XSpace[1:]
+        U = U[1:]
+    if RightBC[0][0]=="D":
+        XSpace = XSpace[:-1]  #Cant index end with 0 nicely otherwise could do inline
+        U = U[:-1]
     def MatrixSystem(Soln):
         return DiffusionConstant*(AMatrix.dot(Soln)+BVector)+Reaction(XSpace,Soln)*(DeltaX**2)
     
     SolnU = scipy.optimize.root(MatrixSystem,U)
-    if SolnU.success:
-        return XSpace, SolnU.x
-    else:
+    if not SolnU.success:
+        #return XSpace, SolnU.x
+    # else:
         print(f" \nFailed:\n   {SolnU.message} \n   Check Bcs \n")
         #print(f")
         return 0,0
+    
+    U = SolnU.x
+    if LeftBc[0][0]=="D":
+        U = np.r_[LeftBc[1],U]
+    if RightBC[0][0]=="D":
+        U = np.r_[U,RightBC[1]]
+    
+    return XValues, U
 
 #%%
 if __name__ == "__main__":
     
-    X0 = 0
-    U0 = 0
-    XN = 1
-    UN = 0
-    
-    delta =1
-    gamma =1
-    
-    DlechtBCs = np.array([[X0,XN],[U0,UN]]) 
-    NeumanBCs = np.array([[X0,XN],[U0,delta]]) #For du/dx|Xn = delta
-    RobinBCS = np.array([[X0,XN],[U0,delta],[0,gamma]]) #For du/dx|Xn = delta-gamma*u(Xn)
-    
-    #print(RobinBCS)
-    #%%
-    #_,GuessForBratu = FiniteSolvePoisson(Bounds=DlechtBCs,Reaction=SimpleSourceTerm)
-    XForGuess = np.linspace(X0,XN,num=40+1)
-    GuessForBratu = ExpectedSoln(DlechtBCs,XForGuess)
-    
-    X,U = FiniteSolvePoisson(Bounds=DlechtBCs,Reaction=BratuTerm,Guess=GuessForBratu)
     
     NewBounds = ("D",(0))
     NewX,NewU = FiniteDifferences(LeftBc=NewBounds,LeftBCLocation=0,
@@ -203,19 +199,9 @@ if __name__ == "__main__":
                                     Reaction=BratuTerm)
     
 
-    #X,U = FiniteSolvePoisson(Bounds=DlechtBCs)
-    #X,U = FiniteSolvePoisson(Bounds=NeumanBCs,Neuman=1)
-    #X,U = FiniteSolvePoisson(Bounds=RobinBCS,Robin=1)
-    #print("Should be 99,100,100")
-    plt.figure()
-    plt.plot(X,U,label="My solution")
-    plt.legend()
-    plt.show()
+
     plt.figure()
     plt.plot(NewX,NewU,label="New soln")
-    ShowSolution = 0
-    if ShowSolution:
-        RealU = ExpectedSoln(DlechtBCs,X)
-        plt.plot(X,RealU)
+
     plt.legend()
     plt.show()

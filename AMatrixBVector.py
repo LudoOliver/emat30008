@@ -1,37 +1,37 @@
 import numpy as np 
 #import FiniteDifferences
 def MakeAMatrixBVector(NPoints,DeltaX,Left,Right,FromGuess=0):
-    if Left[0] == "R":
+    
+    if Left[0][0] == "R":  #Double index allows spelling errors, using properties of length(1) strs
         D1 = Left[1][0]
         Gamma1 = Left[1][1]
         ALeftCorner = (-2*(1-Gamma1*DeltaX),2)
         B0 = -2*D1*DeltaX
-    elif Left[0] == "N":
+    elif Left[0][0] == "N":
         D1 = Left[1]
         ALeftCorner = (-2,2)
         B0 = -2*D1*DeltaX
-    elif Left[0] == "D":
-        if FromGuess:
-            NPoints = NPoints-1
+    elif Left[0][0] == "D":
+        NPoints = NPoints-1
         ALeftCorner = (-2,1)
         B0 = Left[1]
     else:
         print(f"\n Error: please check left BCs \n")
     
-    if Right[0] == "R":
+    if Right[0][0] == "R":
         D2 = Right[1][0]
         Gamma2 = Right[1][1]
         ARightCorner = (-2*(1-Gamma2*DeltaX),2)
         BN = 2*D2*DeltaX
-    elif Right[0] == "N":
+    elif Right[0][0] == "N":
         D2 = Right[1]
         ARightCorner = (-2,2)
         BN = 2*D2*DeltaX
-    elif Right[0] == "D":
-        if FromGuess:
-            NPoints = NPoints-1
+    elif Right[0][0] == "D":
+        NPoints = NPoints-1
         ARightCorner = (1,-2)
         BN = Right[1]
+        
     else:
         print(f"\n Error: please check right BCs \n")
     AMatrix = np.zeros([NPoints,NPoints])
