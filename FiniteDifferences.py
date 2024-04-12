@@ -7,7 +7,7 @@ Created on Tue Mar 12 20:26:26 2024
 
 from CommonModules import *
 import ODESolver
-
+from AMatrixBVector import MakeAMatrixBVector
 def FirstOrderFiniteDiff(Func,StepSize,LocationPoint):
     dx = (Func(LocationPoint+StepSize)-Func(LocationPoint-StepSize))
     dt = (2*StepSize)
@@ -23,7 +23,7 @@ def NoSourceTerm(x,U):
 def SimpleSourceTerm(x,U):
     return 1 # Probably could just be 
 
-def BratuTerm(x,U,mu=0.1):
+def BratuTerm(x,U,mu=2):
     return np.exp(mu*U)
 
 def FiniteSolvePoisson(Bounds,
@@ -78,7 +78,7 @@ def FiniteSolvePoisson(Bounds,
         delta = Bounds[1,1]
         UN = 2*delta*DeltaX
         gamma = Bounds[2,1]
-        EndVector = (2,-1*(1+gamma*DeltaX))
+        EndVector = (2,-2*(1+gamma*DeltaX))
     elif Neuman:
         delta = Bounds[1,1]
         UN = 2*delta*DeltaX
@@ -132,6 +132,49 @@ def ExpectedSoln(BoundaryCond,Xarray,DiffusionConst=1):
     Soln = np.add((-1/(2*DiffusionConst))*np.multiply((Xarray-X0),(Xarray-XN)),(UN-U0)/(XN-X0)*(Xarray-X0)+U0)
     return Soln
 #%%
+def FiniteDifferences(  LeftBc,LeftBCLocation,
+                        RightBC, RightBCLocation,
+                        DiffusionConstant=1,Reaction=NoSourceTerm,
+                        NPoints=100,Guess=None):
+    """[Left/Right]Bc (list): list of form (Type,(Parameters))
+                Type: Either "D","N" or"R" for Dirlecht,Neuman or Robin respectively
+                Paramters: scalar for "D" or "N", tuple (delta,gamma) for "R"
+        [Left/Right]Location (scalar):
+            Postition of left/right boundary in x domain
+        DiffusionConstant (scalar): D - default is 1
+        Reaction (f(x,u),optional) : Reaction term - off by default
+        Guess (array,optional) : Solution estimate 
+        NPoints(int,optional): Number of points in matrix, default is 100
+    Returns:
+        X(array): x values of each grid point in the domain
+        U(array): U(x) for  x in X
+    """
+    if not (Guess is None): 
+        NPoints = len(Guess)
+        U = Guess
+        UFromGuess = 1
+    else:
+        UFromGuess = 0
+        U = np.zeros(NPoints)
+    
+    DeltaX = (RightBCLocation-LeftBCLocation)/NPoints
+    AMatrix , BVector = MakeAMatrixBVector(NPoints=NPoints,DeltaX=DeltaX,
+                                            Left=LeftBc,Right=RightBC,
+                                            FromGuess=UFromGuess)
+    
+    XSpace = np.linspace(LeftBCLocation,RightBCLocation, num=NPoints)
+    def MatrixSystem(Soln):
+        return DiffusionConstant*(AMatrix.dot(Soln)+BVector)+Reaction(XSpace,Soln)*(DeltaX**2)
+    
+    SolnU = scipy.optimize.root(MatrixSystem,U)
+    if SolnU.success:
+        return XSpace, SolnU.x
+    else:
+        print(f" \nFailed:\n   {SolnU.message} \n   Check Bcs \n")
+        #print(f")
+        return 0,0
+
+#%%
 if __name__ == "__main__":
     
     X0 = 0
@@ -145,6 +188,7 @@ if __name__ == "__main__":
     DlechtBCs = np.array([[X0,XN],[U0,UN]]) 
     NeumanBCs = np.array([[X0,XN],[U0,delta]]) #For du/dx|Xn = delta
     RobinBCS = np.array([[X0,XN],[U0,delta],[0,gamma]]) #For du/dx|Xn = delta-gamma*u(Xn)
+    
     #print(RobinBCS)
     #%%
     #_,GuessForBratu = FiniteSolvePoisson(Bounds=DlechtBCs,Reaction=SimpleSourceTerm)
@@ -153,6 +197,11 @@ if __name__ == "__main__":
     
     X,U = FiniteSolvePoisson(Bounds=DlechtBCs,Reaction=BratuTerm,Guess=GuessForBratu)
     
+    NewBounds = ("D",(0))
+    NewX,NewU = FiniteDifferences(LeftBc=NewBounds,LeftBCLocation=0,
+                                    RightBC=NewBounds,RightBCLocation=1,
+                                    Reaction=BratuTerm)
+    
 
     #X,U = FiniteSolvePoisson(Bounds=DlechtBCs)
     #X,U = FiniteSolvePoisson(Bounds=NeumanBCs,Neuman=1)
@@ -160,6 +209,10 @@ if __name__ == "__main__":
     #print("Should be 99,100,100")
     plt.figure()
     plt.plot(X,U,label="My solution")
+    plt.legend()
+    plt.show()
+    plt.figure()
+    plt.plot(NewX,NewU,label="New soln")
     ShowSolution = 0
     if ShowSolution:
         RealU = ExpectedSoln(DlechtBCs,X)

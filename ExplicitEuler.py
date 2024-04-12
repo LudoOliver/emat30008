@@ -3,10 +3,11 @@ from CommonModules import *
 from EulerStep import EulerStep
 import FiniteDifferences
 import ODESolver
-
+from AMatrixBVector import MakeAMatrixBVector
 import matplotlib.animation as animation
 
-def MethodOfLines(BoundaryConditions,
+def MethodOfLines(  LeftBc,LeftBCLocation,
+                    RightBC, RightBCLocation,
                     Euler = 1,
                     Runge = 0,
                     DiffusionConstant =1,
@@ -17,12 +18,8 @@ def MethodOfLines(BoundaryConditions,
                     NPoints = 100,
                     Robin=0,Neuman=0
                     ):
-    X0 = BoundaryConditions[0,0]
-    U0 = BoundaryConditions[1,0]
-    XN = BoundaryConditions[0,1]
     
-    DeltaX = abs(XN-X0)/NPoints
-    
+    DeltaX = (RightBCLocation-LeftBCLocation)/NPoints
     
     if NTimeSteps is None:
         DeltaT = (1/DiffusionConstant)*(DeltaX**2)*(1/2)
@@ -36,19 +33,15 @@ def MethodOfLines(BoundaryConditions,
         print(f"\n Error: Please modify your step values\n")
         return 0
     
-    Adx, Bdx = FiniteDifferences.FiniteSolvePoisson(Bounds=BoundaryConditions,
-                                                    NPoints=NPoints+1,
-                                                    Robin=Robin,
-                                                    Neuman=Neuman,
-                                                    Wrapped=1)
-    
-    if Robin:
-        0
-    elif Neuman:
-        0
-    else:
-        UN = Bdx[-1]
-    XPoints = np.linspace(X0,XN,num=NPoints)
+    # Adx, Bdx = FiniteDifferences.FiniteSolvePoisson(Bounds=BoundaryConditions,
+    #                                                NPoints=NPoints+1,
+    # #                                               Robin=Robin,
+    #  #                                              Neuman=Neuman,
+    #                                             Wrapped=1)
+    AMatrix, BVector = MakeAMatrixBVector(NPoints=NPoints,DeltaX=DeltaX,
+                                            Left=LeftBc,Right=RightBC)
+    NPoints = len(BVector) # Leaving changing Grid size to old function
+    XPoints = np.linspace(LeftBCLocation,RightBCLocation,num=NPoints)
     TimePoints = np.linspace(0,TimeLimit,num=NTimeSteps)
     InitialU = InitalConditions(XPoints)
     #if InitialU[0]!=U0 or InitialU[-1]!=UN
@@ -58,11 +51,11 @@ def MethodOfLines(BoundaryConditions,
         #print(np.shape(ULines))
         ULines[0,:] = InitialU
         for i in range(1,NTimeSteps):
-            ULines[i,:] =  ULines[i-1,:]+(FwdCoefficient*(Adx.dot(ULines[i-1,:])+Bdx))+(DeltaX**2)*ReactionTerm(XPoints,ULines[i-1,:])
-            ULines[i,0]=U0
-            ULines[i,-1]=UN
+            ULines[i,:] =  ULines[i-1,:]+(FwdCoefficient*(AMatrix.dot(ULines[i-1,:])+BVector))+(DeltaX**2)*ReactionTerm(XPoints,ULines[i-1,:])
+            #ULines[i,0]=U0
+            #ULines[i,-1]=UN
     elif Runge :
-        System = lambda u,t : (DiffusionConstant/(DeltaX**2))*(Adx.dot(u)+Bdx)+(1/FwdCoefficient)*ReactionTerm(XPoints,u)
+        System = lambda u,t : (DiffusionConstant/(DeltaX**2))*(AMatrix.dot(u)+BVector)+(1/FwdCoefficient)*ReactionTerm(XPoints,u)
         ULines,TimePoints = ODESolver.Solve_to(System,
                                     x0=InitialU,
                                     tspan=(0,TimeLimit),
@@ -103,15 +96,18 @@ def Main1():
     NeumanBCs = np.array([[X0,XN],[U0,delta]]) #For du/dx|Xn = delta
     RobinBCS = np.array([[X0,XN],[U0,delta],[0,gamma]]) 
     
+    NewBcs = ("D",0)
+    
+    
     SinICsAtBcs = lambda x: SinICs(x,a=X0,b=XN)
-    X,T,Soln = MethodOfLines(DlechtBCs
-                            ,DiffusionConstant=DiffusionConstant
-                            ,InitalConditions=SinICsAtBcs)
+    X,T,Soln = MethodOfLines(LeftBc=NewBcs,LeftBCLocation=0,
+                            RightBC=NewBcs,RightBCLocation=1,
+                            DiffusionConstant=DiffusionConstant,
+                            InitalConditions=SinICsAtBcs)
+    
     TrueSoln = ExpectedSoln(X,T,a=X0,b=XN,d=DiffusionConstant)
     
-    Xrk,Trk,Solnrk = MethodOfLines(DlechtBCs
-                            ,DiffusionConstant=DiffusionConstant
-                            ,InitalConditions=SinICsAtBcs,Euler=0,Runge=1)
+
 
     num_columns = 100
     num_rows = 40000
@@ -120,14 +116,14 @@ def Main1():
     ax = plt.axes(xlim=(0, 1), ylim=(0, 1))
     line1, = ax.plot([], [], label="Soln", lw=2)
     line2, = ax.plot([], [], label="True Soln", lw=2)
-    line3, = ax.plot([],[],label="Soln with runge-kutta",lw=2)
+    #line3, = ax.plot([],[],label="Soln with runge-kutta",lw=2)
     #ax.xlim((0,1))
     #ax.ylim((0,1))
     def update(frame):
         line1.set_data(X, Soln[frame*200,:])
         line2.set_data(X, TrueSoln[frame*200,:])
-        line3.set_data(X, Solnrk[frame*200,:])
-        return line1, line2, line3
+        #line3.set_data(X, Solnrk[frame*200,:])
+        return line1, line2#, line3
     ani = animation.FuncAnimation(fig, update, frames=int(num_rows/200), blit=True)
     ax.legend()
     plt.show()
@@ -169,13 +165,13 @@ def Main3():
     plt.title("Runge")
     plt.show()
 if __name__=="__main__":
-    #Main1()
-    X0 = 0
-    U0 = 0
-    XN = 1
-    UN = 0
+    Main1()
+    #X0 = 0
+    #U0 = 0
+    #XN = 1
+    #UN = 0
     
-    DiffusionConstant = 1
-    DlechtBCs = np.array([[X0,XN],[U0,UN]]) 
-    Main3()
-    Main2()
+    #DiffusionConstant = 1
+    #DlechtBCs = np.array([[X0,XN],[U0,UN]]) 
+    #Main3()
+    #Main2()
