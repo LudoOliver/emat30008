@@ -21,11 +21,11 @@ def MakeAMatrixBVector(NPoints,DeltaX,Left,Right,FromGuess=0):
     if Right[0][0] == "R":
         D2 = Right[1][0]
         Gamma2 = Right[1][1]
-        ARightCorner = (-2*(1-Gamma2*DeltaX),2)
+        ARightCorner = (2,-2*(1-Gamma2*DeltaX))
         BN = 2*D2*DeltaX
     elif Right[0][0] == "N":
         D2 = Right[1]
-        ARightCorner = (-2,2)
+        ARightCorner = (2,-2)
         BN = 2*D2*DeltaX
     elif Right[0][0] == "D":
         NPoints = NPoints-1

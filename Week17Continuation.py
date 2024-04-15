@@ -111,7 +111,6 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
         return ArcLengthRHS
     
     for i in range(2,ContinuationMaxSteps):
-        if True: # min(ParamBounds) < ParamSpace[i-1] < max(ParamBounds):
             #SolnSecant =Soln[i-1]-SolnOlder
             #ParamSecant =ParamOld-ParamOlder # this could be done in the loop, would make it easier
             ParamSecant = ParamSpace[i-1]-ParamSpace[i-2]
@@ -132,11 +131,7 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
             SolnSpace[i,:] = Result[:-1]
             ParamSpace[i] = Result[-1]
             
-        else:
-            SolnSpace = np.squeeze([i for i in SolnSpace if not np.isnan(i).all()])
-            ParamSpace = [i for i in ParamSpace if not np.isnan(i)]
-            print(f"Bounds exceeded after {i} steps")
-            return SolnSpace,ParamSpace
+
     SolnSpace = np.squeeze([i for i in SolnSpace if not np.isnan(i).all()])
     ParamSpace = [i for i in ParamSpace if not np.isnan(i)]    
     return SolnSpace,ParamSpace

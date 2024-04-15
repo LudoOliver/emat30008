@@ -132,9 +132,10 @@ def ExpectedSoln(BoundaryCond,Xarray,DiffusionConst=1):
     Soln = np.add((-1/(2*DiffusionConst))*np.multiply((Xarray-X0),(Xarray-XN)),(UN-U0)/(XN-X0)*(Xarray-X0)+U0)
     return Soln
 #%%
-def FiniteDifferences(  LeftBc,LeftBCLocation,
+def FiniteDifferences(  LeftBC,LeftBCLocation,
                         RightBC, RightBCLocation,
                         DiffusionConstant=1,Reaction=NoSourceTerm,
+
                         NPoints=100,Guess=None):
     """[Left/Right]Bc (list): list of form (Type,(Parameters))
                 Type: Either "D","N" or"R" for Dirlecht,Neuman or Robin respectively
@@ -159,19 +160,21 @@ def FiniteDifferences(  LeftBc,LeftBCLocation,
     
     DeltaX = (RightBCLocation-LeftBCLocation)/NPoints
     AMatrix , BVector = MakeAMatrixBVector(NPoints=NPoints,DeltaX=DeltaX,
-                                            Left=LeftBc,Right=RightBC,
+                                            Left=LeftBC,Right=RightBC,
                                             FromGuess=UFromGuess)
     
     XValues = np.linspace(LeftBCLocation,RightBCLocation, num=NPoints)
     XSpace = XValues
-    if LeftBc[0][0]=="D":
+    if LeftBC[0][0]=="D":
         XSpace = XSpace[1:]
         U = U[1:]
     if RightBC[0][0]=="D":
         XSpace = XSpace[:-1]  #Cant index end with 0 nicely otherwise could do inline
         U = U[:-1]
+
+
     def MatrixSystem(Soln):
-        return DiffusionConstant*(AMatrix.dot(Soln)+BVector)+Reaction(XSpace,Soln)*(DeltaX**2)
+            return DiffusionConstant*(AMatrix.dot(Soln)+BVector)+Reaction(XSpace,Soln)*(DeltaX**2)
     
     SolnU = scipy.optimize.root(MatrixSystem,U)
     if not SolnU.success:
@@ -182,8 +185,8 @@ def FiniteDifferences(  LeftBc,LeftBCLocation,
         return 0,0
     
     U = SolnU.x
-    if LeftBc[0][0]=="D":
-        U = np.r_[LeftBc[1],U]
+    if LeftBC[0][0]=="D":
+        U = np.r_[LeftBC[1],U]
     if RightBC[0][0]=="D":
         U = np.r_[U,RightBC[1]]
     
@@ -194,7 +197,7 @@ if __name__ == "__main__":
     
     
     NewBounds = ("D",(0))
-    NewX,NewU = FiniteDifferences(LeftBc=NewBounds,LeftBCLocation=0,
+    NewX,NewU = FiniteDifferences(LeftBC=NewBounds,LeftBCLocation=0,
                                     RightBC=NewBounds,RightBCLocation=1,
                                     Reaction=BratuTerm)
     
