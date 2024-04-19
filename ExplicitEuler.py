@@ -153,13 +153,13 @@ def Main1():
     ax = plt.axes(xlim=(0, 1), ylim=(0, 1))
     line1, = ax.plot([], [], label="Soln", lw=2)
     line2, = ax.plot([], [], label="True Soln", lw=2)
-    line3, = ax.plot([],[],label="Implicit Soln",lw=2)
+    #line3, = ax.plot([],[],label="Implicit Soln",lw=2)
     #ax.xlim((0,1))
     #ax.ylim((0,1))
     def update(frame):
         line1.set_data(X, Soln[frame*200,:])
         line2.set_data(X, TrueSoln[frame*200,:])
-        line3.set_data(ImpX, ImpSoln[frame*200,:])
+        #line3.set_data(ImpX, ImpSoln[frame*200,:])
         return line1, line2#, line3
     ani = animation.FuncAnimation(fig, update, frames=int(num_rows/200)-1, blit=True)
     ax.legend()
@@ -218,7 +218,7 @@ def Main3():
     plt.legend()
     plt.show()
 if __name__=="__main__":
-    Main2()
+    Main1()
     #X0 = 0
     #U0 = 0
     #XN = 1
