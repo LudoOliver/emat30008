@@ -18,31 +18,24 @@ def ShootingSolveWrapper(Func,t,Param,SolnEstimate,SolverStepSize=0.001):
     x,period = Week16General.Shooting(WrappedFunc, SolnEstimate[:-1], SolnEstimate[-1],StepSize=SolverStepSize)
     return np.hstack([x,period])
     
-#def NaturalParameterContintuation(Func,X0,Param0,ParamNSteps,ParamStepSize=0.1):#,discretisation=lambda x:x):
-#   ParameterSpace =np.linspace(Param0,Param0+ParamStepSize*ParamNSteps,ParamNSteps)
-#    SolutionSpace = np.zeros([ParamNSteps,(np.size(X0))])
-#    SolutionSpace[0,:] = scipy.optimize.root(lambda x: Func(x,1,Param0),X0).x
-#    for i in range(1,ParamNSteps):
-#        #CurrentParam = ParameterSpace[i]
-#        SolutionSpace[i,:] = SimpleSolveWrapper(Func,1,ParameterSpace[i],SolutionSpace[i-1,:])
-#    return SolutionSpace, ParameterSpace 
 
-    
-#def ShootingNumericalContinuation(Func,X0,Param0,ParamNSteps=10,ParamStepSize=0.1,SolverStepSize=0.1):
-    #0.1 Is recomended as it is incredibly slow for Modified Btea From
-    #ParameterSpace =np.linspace(Param0,Param0+ParamStepSize*ParamNSteps,ParamNSteps)
-    #SolutionSpace = np.zeros([ParamNSteps,(np.size(X0))])
-    #Initial = lambda u,t :Func(u, t,Param0)
-    #SolutionSpace[0,:-1],SolutionSpace[0,-1] = Week16General.Shooting(Initial, X0[0:-1], X0[-1],SolverStepSize=0.1) #could be unpack issues
-    #for i in range(1,ParamNSteps):
-        #Current = lambda u,t :Func(u, t,ParameterSpace[i])
-        #SolutionSpace[i,:-1],SolutionSpace[i,-1] = Week16General.Shooting(Current, SolutionSpace[i-1,:-1], SolutionSpace[i-1,-1])
-        #SolutionSpace[i,:] = ShootingSolveWrapper(Func,1,ParameterSpace[i],SolutionSpace[i-1,:])
-        
-    
-    #return SolutionSpace ,ParameterSpace
 
 def NaturalContinuation(Func,X0,Param0,WithShooting=0,ParamNSteps=10,ParamStepSize=0.1,SolverStepSize=0.1):
+    """Natural Continuation
+
+    Args:
+        Func (function): function for continuation
+        X0 (array): initial conditions
+        Param0 (scalar): starting parameter value
+        WithShooting (boolean): option to use shooting methods, default is off
+        ParamNSteps (int, optional): Number of continuation steps. Defaults to 10.
+        ParamStepSize (float, optional): Size of each step, can be positive or negative. Defaults to 0.1.
+        SolverStepSize (float, optional): Step size used by the ODE solver. Defaults to 0.1.
+
+    Returns:
+        SolutionSpace(2d-array) : array of solutions for each parameter value
+        ParamSpace(1d-array) : corresponding array of parameter values
+    """
     ParameterSpace =np.linspace(Param0,Param0+ParamStepSize*ParamNSteps,ParamNSteps)
     SolutionSpace = np.zeros([ParamNSteps,(np.size(X0))])
     if WithShooting:
@@ -62,13 +55,11 @@ def NaturalContinuation(Func,X0,Param0,WithShooting=0,ParamNSteps=10,ParamStepSi
                 return 0,0
     return SolutionSpace ,ParameterSpace
 
-#def ShootingArcLengthWrapper(func,X,Param)
-# return func
 
 
 
 def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
-                        ParamStepSize=0.1,WithShooting=1,Solver=ODESolver.RungeKutta4,
+                        ParamStepSize=0.1,Solver=ODESolver.RungeKutta4,
                         SolverStepSize=0.1
                         ):
     """_summary_
@@ -79,7 +70,6 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
         ParamBounds (tuple): range of parameter to check across (A,B)
         ContinuationMaxSteps (_type_): max number of iterations
         ParamStepSize (float, optional): First step in parameter space, Defaults to 0.1.
-        WithShooting (int, optional): Shooting on/off, Defaults to 1.
         Solver (_type_, optional): integrator to use, Defaults to ODESolver.RungeKutta4.
         SolverStepSize (float, optional): stepsize of numerical integrator, Defaults to 0.1.
 
@@ -101,7 +91,6 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
         
         SolnToInvestigate,ParamToInvestigate = SolnAndParam[:-1],SolnAndParam[-1]
         FuncAtParam = lambda x,t : Func(x,t,ParamToInvestigate)
-        SingleShotArgs = (SolverStepSize,Solver,FuncAtParam)
         
         ShootingLHS = Week16General.SingleShot(SolnToInvestigate,SolverStepSize,Solver,FuncAtParam)
         ArcCondition = (np.dot(ParamSecant,(ParamToInvestigate-ParamEstimate))+
@@ -144,8 +133,6 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
 
 
 
-#def ArcLengthContinuation
-    
         
 def Main():
     #Answer,Space = NaturalParameterContintuation(Week17Functions.Cubic, 1.1, -2, 40) 

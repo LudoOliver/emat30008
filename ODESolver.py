@@ -18,16 +18,16 @@ def RungeKutta4(Ftx,Xn,Tn,StepSize=0.001):
 def Solve_to(FuncToSolve,x0,tspan,DeltaTMax=0.0001,SolverToUse=RungeKutta4):#(Ftx, Xn, Tn)):
     """
     Arguements:
-        FuncToSolve: rhs of a ode
-        x0 : array of initial conditions
-        tspan : start and end of timespan to integrate across
-        DeltaTMax : maximum timestep to use, default = 0.001
-        SolverToUse : integrator to use, defualt is RungeKutta4
+        FuncToSolve (function(x,t)): rhs of a ode
+        x0 (array): array of initial conditions
+        tspan (tuple): start and end of timespan to integrate across
+        DeltaTMax (float): maximum timestep to use, default = 0.001
+        SolverToUse (function): integrator to use, defualt is RungeKutta4
         
 
     Returns:
-        X : 2d array of solutions
-        T : 1d array of time values corresponding to the solutions
+        X (2d array): of solutions
+        T (1d array): corresponding time values
     """
     t0,t1 = tspan
     NSteps = math.ceil((t1-t0)/DeltaTMax) #Whole Number of step size
@@ -38,40 +38,3 @@ def Solve_to(FuncToSolve,x0,tspan,DeltaTMax=0.0001,SolverToUse=RungeKutta4):#(Ft
     for i in range(1,NSteps):
         XArray[:,i] = SolverToUse(FuncToSolve,XArray[:,i-1],TArray[i-1],StepSize)
     return XArray, TArray
-
-#%% Specific
-"""
-def ODEFunc(t,x):
-    return x
-
-def VectorODe(t,x):
-    x1 = x[1]
-    x2 = -x[0]
-    return np.array([x1,x2])
-x0 = [0,1]
-t0 = 0
-t1 = 50
-Time = [0,50]
-MinStep = 0.1
-
-t,x = Solve_to(VectorODe,x0,Time,MinStep,EulerStep,)
-plt.subplot(2,1,1)
-plt.plot(t,x[0,:])
-plt.title("x vs t")
-plt.subplot(2,1,2)
-plt.plot(x[1,:],x[0,:])
-plt.title("x vs x'")
-plt.tight_layout()
-plt.suptitle("Eulers method solutions", fontsize=16)
-plt.subplots_adjust(top=0.85,bottom=0.15)
-plt.figtext(0.1,0.05,f"For x''=-x with x(0)={x0[0]} and x'(0)={x0[1]}  evaluated to x({t1})with stepsize {MinStep}",wrap=True)
-
-plt.show()
-
-#plt.plot(x,y[],label=f"RungeKutta4")
-#t,x = Solve_to(0,1,1,0.001,EulerStep,ODEFunc)
-#plt.plot(x,y,label=f"Eulers method")
-#plt.legend()
-#plt.show()
-
-"""

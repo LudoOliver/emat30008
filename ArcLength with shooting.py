@@ -4,6 +4,7 @@ import Week17Functions
 import ODESolver
 
 def ShootingSolveWrapper(Func,t,Param,SolnEstimate):
+    #Not intended for front end use
     WrappedFunc = lambda u,t :Func(u, t,Param)
     #print(SolnEstimate[:-1])
     #print(SolnEstimate[-1])
@@ -14,14 +15,20 @@ def ShootingSolveWrapper(Func,t,Param,SolnEstimate):
 
 
 def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
-                        ParamStepSize=0.1,WithShooting=1,Solver=ODESolver.RungeKutta4,
+                        ParamStepSize=0.1,Solver=ODESolver.RungeKutta4,
                         SolverStepSize=0.1
                         ):
     
-    """_summary_
-
+    """ Func(function) : function of (u,x)
+        X0 (array): approximate  initial conditions of form (x1,..xn-1,T)
+        ParamBounds (tuple):the region of parameter space to investigate
+        ContinuationMaxSteps (int): the upper bound on the number of steps taken
+        ParamStepSize (float,optional): initial step in parameter space, default is 0.1
+        Solver (func,optional) : ode solver to use, default is RK4
+        SolverStepSize (float,optional) : step size to solve ODEs with, default is 0.1
     Returns:
-        _type_: _description_
+        SolnSpace (array): 2d array of solutions
+        ParamSpace (array): 1d array of the corresponding parameter values
     """
     
     P0,PN = ParamBounds[0],ParamBounds[1]
@@ -33,23 +40,7 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
     ParamSpace[0],ParamSpace[1] = ParamBounds[0],ParamBounds[0]+Direction*ParamStepSize
     SolnSpace[0,:] = ShootingSolveWrapper(Func,1,ParamSpace[0],X0)
     SolnSpace[1,:] = ShootingSolveWrapper(Func,1,ParamSpace[1],SolnSpace[0,:])
-    
-    def OldArcShootRootFind(SolnAndParam):
-        
-        SolnToInvestigate,ParamToInvestigate = SolnAndParam[0],SolnAndParam[1]
-        Period = SolnToInvestigate[-1]
-        
-        FuncAtParam = lambda x,t : Func(x,t,ParamToInvestigate)
-        X0 = SolnEstimate[:-1]
-        X,_ = ODESolver.Solve_to(Func,X0,[0,Period],DeltaTMax=0.1)
-        EndX = X[-1,:]
-        XCondition = X-X0
-        PhaseCondition = FuncAtParam(X0)[0]
-        ArcCondition = (np.dot(ParamSecant,(ParamToInvestigate-ParamEstimate))+
-                                np.dot(SolnSecant,(SolnToInvestigate-SolnEstimate)))
-        
-        return np.array([XCondition,PhaseCondition,ArcCondition])
-    
+
     def ArcShootRootFind(SolnAndParam):
         
         SolnToInvestigate,ParamToInvestigate = SolnAndParam[:-1],SolnAndParam[-1] 
@@ -85,7 +76,9 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
             SolnSpace = np.squeeze([i for i in SolnSpace if not np.isnan(i).all()])
             ParamSpace = [i for i in ParamSpace if not np.isnan(i)]
             print("Bounds Exceeded")
-            return SolnSpace,ParamSpace
+            #If an error is encountered, all results from up to that point are returned
+            return SolnSpace,ParamSpace 
+            
     SolnSpace = np.squeeze([i for i in SolnSpace if not np.isnan(i).all()])
     ParamSpace = [i for i in ParamSpace if not np.isnan(i)]    
     return SolnSpace,ParamSpace

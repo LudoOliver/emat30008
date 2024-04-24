@@ -1,7 +1,19 @@
 import numpy as np 
-#import FiniteDifferences
+
 def MakeAMatrixBVector(NPoints,DeltaX,Left,Right,FromGuess=0):
-    
+    """Create sthe Axx matrix and Bxx vector needed for finite difference methods
+
+    Args:
+        NPoints (int): number of points used to define the gird
+        DeltaX (float): step size in x
+        Left (tuple): left boundary condition
+        Right (tuple): right boundary condition_
+        FromGuess (int, optional): _description_. Defaults to 0.
+
+    Returns:
+        A (2d-array): the Axx matrix 
+        B (1d-array): the Bxx vector
+    """
     if Left[0][0] == "R":  #Double index allows spelling errors, using properties of length(1) strs
         D1 = Left[1][0]
         Gamma1 = Left[1][1]

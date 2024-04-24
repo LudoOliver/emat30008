@@ -25,8 +25,8 @@ def SimpleSourceTerm(x,U):
 
 def BratuTerm(x,U,mu=2):
     return np.exp(mu*U)
-
-def FiniteSolvePoisson(Bounds,
+#This is no longer in use
+def FiniteSolvePoisson(Bounds, 
                         DiffusionConstant=1,Reaction=NoSourceTerm,
                         NPoints=100,Guess=None,
                         Wrapped=0,
@@ -137,7 +137,9 @@ def FiniteDifferences(  LeftBC,LeftBCLocation,
                         DiffusionConstant=1,Reaction=NoSourceTerm,
 
                         NPoints=100,Guess=None):
-    """[Left/Right]Bc (list): list of form (Type,(Parameters))
+    """
+    Parameters
+        [Left/Right]Bc (list): list of form (Type,(Parameters))
                 Type: Either "D","N" or"R" for Dirlecht,Neuman or Robin respectively
                 Paramters: scalar for "D" or "N", tuple (delta,gamma) for "R"
         [Left/Right]Location (scalar):

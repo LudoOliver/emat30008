@@ -9,3 +9,4 @@ import scipy
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+ ## Makes it easier to remember what I need

@@ -19,7 +19,24 @@ def MethodOfLines(  LeftBC,LeftBCLocation,
                     Implicit = 0,
                     NPoints = 100,
                     ):
-    
+    """
+    Paramters
+        [Left/Right]Bc (list): list of form (Type,(Parameters))
+                Type: Either "D","N" or"R" for Dirlecht,Neuman or Robin respectively
+                Parameters: scalar for "D" or "N", tuple (delta,gamma) for "R"
+        [Left/Right]Location (scalar):
+            Position of the left/right boundary in x domain
+        DiffusionConstant (scalar): D - default is 1
+        Euler(boolean,optional) : Euler method on/off, on by default
+        Implicit(boolean,optional) : the choice to use implicit methods, off by default
+        Runge(boolean,optional) : the choice to use RK4 instead - Euler must be turned off to use
+        Reaction (f(x,u),optional) : Reaction term - off by default
+        Guess (array,optional) : Solution estimate 
+        NPoints(int,optional): Number of points in matrix, default is 100
+    Returns:
+        X(array): x values of each grid point in the domain
+        U(array): U(x) for  x in X
+    """
     DeltaX = (RightBCLocation-LeftBCLocation)/NPoints
     
     if NTimeSteps is None:

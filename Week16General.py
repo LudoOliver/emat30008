@@ -114,21 +114,3 @@ if __name__ =="__main__":
     ShootX = np.array([0.1,0.1])
     main()
 
-""" Junk code, kept for testing /if i need to go back quickly
-    def SingleShot(ShootArray,StepSize=StepSize,Solver=Solver):
-        StartConditions = ShootArray[0:-1]
-        Period = ShootArray[-1]
-        x,t = ODESolver.Solve_to(EqnToSolve,StartConditions,[0,Period],StepSize,Solver)
-        G = StartConditions-x[:,-1] #Difference between output and input
-        G = np.append(G,EqnToSolve(x[:,-1],0)[0]) #Adds the 0 derrivative phase condition
-        return G
-    SingleShotArgs = (StepSize,Solver)
-def SingleShot(EqnToSolve,ShootArray,StepSize,Solver):
-   StartConditions = ShootArray[0:-1]
-   Period = ShootArray[-1]
-   x,t = ODESolver.Solve_to(EqnToSolve,StartConditions,[0,Period],StepSize,Solver)
-   G = StartConditions-x[:,-1] #Difference between output and input
-   #print(G)
-   G = np.append(G,EqnToSolve(x[:,-1],0)[0]) #Adds the 0 derrivative phase condition
-   return G
-"""
