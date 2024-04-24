@@ -1,7 +1,7 @@
 import numpy as np 
 
 def MakeAMatrixBVector(NPoints,DeltaX,Left,Right,FromGuess=0):
-    """Create sthe Axx matrix and Bxx vector needed for finite difference methods
+    """Creates the Axx matrix and Bxx vector needed for finite difference methods,not intended as a user level function
 
     Args:
         NPoints (int): number of points used to define the gird
@@ -15,7 +15,7 @@ def MakeAMatrixBVector(NPoints,DeltaX,Left,Right,FromGuess=0):
         B (1d-array): the Bxx vector
     """
     if Left[0][0] == "R":  #Double index allows spelling errors, using properties of length(1) strs
-        D1 = Left[1][0]
+        D1 = Left[1][0]    #Unpacking the BC parameters
         Gamma1 = Left[1][1]
         ALeftCorner = (-2*(1-Gamma1*DeltaX),2)
         B0 = -2*D1*DeltaX
@@ -46,11 +46,11 @@ def MakeAMatrixBVector(NPoints,DeltaX,Left,Right,FromGuess=0):
         
     else:
         print(f"\n Error: please check right BCs \n")
-    AMatrix = np.zeros([NPoints,NPoints])
+    AMatrix = np.zeros([NPoints,NPoints]) #Constructing the A matrix iteratively
     AMatrix[0,(0,1)] = ALeftCorner
-    for i in range(1,NPoints-1):
+    for i in range(1,NPoints-1):  
         AMatrix[i,(i-1,i,i+1)]= (1,-2,1)
-    AMatrix[-1,(-2,-1)] = ARightCorner
+    AMatrix[-1,(-2,-1)] = ARightCorner  
     
     BVector = np.zeros(NPoints)
     BVector[0] = B0

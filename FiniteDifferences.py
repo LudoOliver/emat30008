@@ -25,7 +25,7 @@ def SimpleSourceTerm(x,U):
 
 def BratuTerm(x,U,mu=2):
     return np.exp(mu*U)
-#This is no longer in use
+
 
 def ExpectedSoln(BoundaryCond,Xarray,DiffusionConst=1):
     X0 = BoundaryCond[0,0]
@@ -40,7 +40,7 @@ def FiniteDifferences(  LeftBC,LeftBCLocation,
                         DiffusionConstant=1,Reaction=NoSourceTerm,
 
                         NPoints=100,Guess=None):
-    """ Finds the finite difference solution to a PDE
+    """ Finds the finite difference solution to a diffusion type PDE 
     Parameters
         [Left/Right]Bc (list): list of form (Type,(Parameters))
                 Type: Either "D","N" or"R" for Dirlecht,Neuman or Robin respectively
@@ -55,7 +55,7 @@ def FiniteDifferences(  LeftBC,LeftBCLocation,
         X(array): x values of each grid point in the domain
         U(array): U(x) for  x in X
     """
-    if not (Guess is None): 
+    if not (Guess is None): #Checking for an approximate solution
         NPoints = len(Guess)
         U = Guess
         UFromGuess = 1
@@ -69,12 +69,12 @@ def FiniteDifferences(  LeftBC,LeftBCLocation,
                                             FromGuess=UFromGuess)
     
     XValues = np.linspace(LeftBCLocation,RightBCLocation, num=NPoints)
-    XSpace = XValues
+    XSpace = XValues         # Cropping the range of x to match BCs
     if LeftBC[0][0]=="D":
         XSpace = XSpace[1:]
         U = U[1:]
     if RightBC[0][0]=="D":
-        XSpace = XSpace[:-1]  #Cant index end with 0 nicely otherwise could do inline
+        XSpace = XSpace[:-1]  
         U = U[:-1]
 
 
@@ -97,19 +97,3 @@ def FiniteDifferences(  LeftBC,LeftBCLocation,
     
     return XValues, U
 
-#%%
-if __name__ == "__main__":
-    
-    
-    NewBounds = ("D",(0))
-    NewX,NewU = FiniteDifferences(LeftBC=NewBounds,LeftBCLocation=0,
-                                    RightBC=NewBounds,RightBCLocation=1,
-                                    Reaction=BratuTerm)
-    
-
-
-    plt.figure()
-    plt.plot(NewX,NewU,label="New soln")
-
-    plt.legend()
-    plt.show()
