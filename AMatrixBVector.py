@@ -58,33 +58,3 @@ def MakeAMatrixBVector(NPoints,DeltaX,Left,Right,FromGuess=0):
     
     return AMatrix, BVector
 
-def Main():
-    X0 = 0
-    U0 = 0
-    XN = 1
-    UN = 0
-    
-    delta =1
-    gamma =1
-    
-    DlechtBCs = np.array([[X0,XN],[U0,UN]]) 
-    NeumanBCs = np.array([[X0,XN],[U0,delta]]) #For du/dx|Xn = delta
-    RobinBCS = np.array([[X0,XN],[U0,delta],[0,gamma]]) 
-    
-    OldA,OldB = FiniteDifferences.FiniteSolvePoisson(Bounds=DlechtBCs,Wrapped=1)
-    
-    NewBCs = ("D",(0))
-    NewA,NewB = MakeAMatrixBVector(99,0.01,Left=NewBCs,Right=NewBCs)
-    print("New properties")
-    print(f" A size = {np.size(NewA)}")
-    print(f" B size = {np.size(NewB)}")
-    print(f"\n Old Properties")
-    print(f"A size = {np.size(OldA)}")
-    print(f"B size = {np.size(OldB)}")
-    print(f"\n Difference")
-    print(f"A {np.sum(np.abs(OldA-NewA))}")
-    print(f"B {np.sum(np.abs(OldB-NewB))} \n")
-    print(OldB)
-    print(NewB)
-if __name__=="__main__":
-    Main()

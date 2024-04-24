@@ -16,7 +16,7 @@ def RungeKutta4(Ftx,Xn,Tn,StepSize=0.001):
 
 #def Solve_to(t0,t1,x0,DeltaTMax,SolverToUse,FuncToSolve):
 def Solve_to(FuncToSolve,x0,tspan,DeltaTMax=0.0001,SolverToUse=RungeKutta4):#(Ftx, Xn, Tn)):
-    """
+    """ Solves a given ODE
     Arguements:
         FuncToSolve (function(x,t)): rhs of a ode
         x0 (array): array of initial conditions

@@ -62,15 +62,15 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
                         ParamStepSize=0.1,Solver=ODESolver.RungeKutta4,
                         SolverStepSize=0.1
                         ):
-    """_summary_
+    """Preforms Pseudo Arc Length Continuation with numerical shooting methods
 
     Args:
-        Func (_type_): _description_
-        X0 (_type_): array of [x1...xn,t]
+        Func (function): ODE for continuation
+        X0 (array): a guess solution of [x1...xn,t]
         ParamBounds (tuple): range of parameter to check across (A,B)
-        ContinuationMaxSteps (_type_): max number of iterations
+        ContinuationMaxSteps (int): max number of iterations
         ParamStepSize (float, optional): First step in parameter space, Defaults to 0.1.
-        Solver (_type_, optional): integrator to use, Defaults to ODESolver.RungeKutta4.
+        Solver (function, optional): integrator to use, Defaults to ODESolver.RungeKutta4.
         SolverStepSize (float, optional): stepsize of numerical integrator, Defaults to 0.1.
 
     Returns:
@@ -113,7 +113,7 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
             except:
                 SolnSpace = np.squeeze([i for i in SolnSpace if not np.isnan(i).all()])
                 ParamSpace = [i for i in ParamSpace if not np.isnan(i)]
-                print(f"Continuation Failed after {i} steps")
+                print(f"Continuation Failed after {i} steps \n All valid solutions will be returned")
                 return SolnSpace,ParamSpace
                 #break
             #NewSoln,NewParam = Result[0],Result[1]

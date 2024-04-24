@@ -17,7 +17,7 @@ def predator_prey(x,t):
 
 
 def SingleShot(ShootArray,StepSize,Solver,EqnToSolve):
-    """The root finding problem
+    """The root finding problem for shooting methods
 
     Args:
         ShootArray ([Array],Scalar): X0, Time period
@@ -38,6 +38,7 @@ def SingleShot(ShootArray,StepSize,Solver,EqnToSolve):
 
 def Shooting(EqnToSolve,X0,T0,StepSize=0.001,Solver=ODESolver.RungeKutta4):
     """
+    Preforms numerical shooting on a given ODE
     Input:
         EqnToSolve : Function of(x,t)
             -the ODE to integrate

@@ -79,23 +79,7 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
             #If an error is encountered, all results from up to that point are returned
             return SolnSpace,ParamSpace 
             
-    SolnSpace = np.squeeze([i for i in SolnSpace if not np.isnan(i).all()])
+    SolnSpace = np.squeeze([i for i in SolnSpace if not np.isnan(i).all()]) #Ensuring correct output dimensions
     ParamSpace = [i for i in ParamSpace if not np.isnan(i)]    
     return SolnSpace,ParamSpace
 
-def Main(): 
-    SolnSpace,ParamSpace = ShootingArcLengthCont(Week17Functions.BetaFormHopf,[1.1,0.1,30],[0.4,2],15,SolverStepSize=0.001)
-    #ShootingNumericalContinuation(Week17Functions.ModifiedBetaFormHopf,[2.3,0,30],2,ParamNSteps=2,ParamStepSize=-0.1 )
-    plt.plot(ParamSpace,SolnSpace[:,0])
-    plt.show()
-    return    
-def TestWrapper():
-    Ans1,Time1 = Week16General.Shooting(Week17Functions.BetaFormHopf,[1.1,0],30)#,StepSize=0.0000001)
-    print(Ans1)
-    print(Time1)
-    Ans = ShootingSolveWrapper(Week17Functions.BetaFormHopf,1,0,[1.1,0.1,6])
-    print(Ans)
-    print(Ans1)
-if __name__ == "__main__":
-    #TestWrapper()
-    Main()
