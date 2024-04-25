@@ -32,8 +32,6 @@ Examples and instructions:
 
 
 """
-# Helping clean up naming conventions in this module
-#from CommonModules import *
 from Week16General import Shooting
 import Week17Continuation as Continuation
 import ODESolver

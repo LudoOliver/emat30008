@@ -133,17 +133,3 @@ def ShootingArcLengthCont(Func,X0,ParamBounds,ContinuationMaxSteps,
 
 
 
-        
-def Main():
-    #Answer,Space = NaturalParameterContintuation(Week17Functions.Cubic, 1.1, -2, 40) 
-    Answer,Space = ShootingNumericalContinuation(Week17Functions.ModifiedBetaFormHopf,[2.3,0,30],2,ParamNSteps=2,ParamStepSize=-0.1 )
-    plt.plot(Space,Answer[:,0])
-    plt.show()
-    return       
-
-
-
-if __name__ == "__main__":
-    Main()
-    
-
